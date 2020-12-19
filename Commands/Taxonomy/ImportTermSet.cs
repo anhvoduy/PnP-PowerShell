@@ -2,12 +2,11 @@
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.Taxonomy;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Taxonomy
+namespace PnP.PowerShell.Commands.Taxonomy
 {
     [Cmdlet(VerbsData.Import, "PnPTermSet", SupportsShouldProcess = false)]
-    [CmdletAlias("Import-SPOTermSet")]
     [CmdletHelp("Imports a taxonomy term set from a file in the standard format.",
         Category = CmdletHelpCategory.Taxonomy,
         DetailedDescription = @"The format of the file is the same as that used by the import function in the web interface. A sample file can be obtained from the web interface.
@@ -20,9 +19,9 @@ The first data row must contain the Term Set Name, Term Set Description, and LCI
 
 It is recommended that a fixed GUID be used as the termSetId, to allow the term set to be easily updated (so do not pass Guid.Empty).
 
-In contrast to the web interface import, this is not a one-off import but runs synchronisation logic allowing updating of an existing Term Set. When synchronising, any existing terms are matched (with Term Description and Available for Tagging updated as necessary), any new terms are added in the correct place in the hierarchy, and (if synchroniseDeletions is set) any terms not in the imported file are removed.
+In contrast to the web interface import, this is not a one-off import but runs synchronization logic allowing updating of an existing Term Set. When synchronizing, any existing terms are matched (with Term Description and Available for Tagging updated as necessary), any new terms are added in the correct place in the hierarchy, and (if synchronizeDeletions is set) any terms not in the imported file are removed.
 
-The import file also supports an expanded syntax for the Term Set Name and term names (Level 1 Term, Level 2 Term, etc). These columns support values with the format 'Name | GUID', with the name and GUID separated by a pipe character (note that the pipe character is invalid to use within a taxomony item name). This expanded syntax is not required, but can be used to ensure all terms have fixed IDs.")]
+The import file also supports an expanded syntax for the Term Set Name and term names (Level 1 Term, Level 2 Term, etc). These columns support values with the format 'Name | GUID', with the name and GUID separated by a pipe character (note that the pipe character is invalid to use within a taxonomy item name). This expanded syntax is not required, but can be used to ensure all terms have fixed IDs.")]
     [CmdletExample(
         Code = @"PS:> Import-PnPTermSet -GroupName 'Standard Terms' -Path 'C:\\Temp\\ImportTermSet.csv' -SynchronizeDeletions",
         Remarks = "Creates (or updates) the term set specified in the import file, in the group specified, removing any existing terms not in the file.",
@@ -35,7 +34,7 @@ The import file also supports an expanded syntax for the Term Set Name and term 
         Code = @"PS:> Import-PnPTermSet -GroupName 'Standard Terms' -Path 'C:\\Temp\\ImportTermSet.csv' -IsOpen $true -Contact 'user@example.org' -Owner 'user@example.org'",
         Remarks = "Creates (or updates) the term set specified in the import file, setting the IsOpen, Contact, and Owner properties as specified.",
         SortOrder = 3)]
-    public class ImportTermSet : SPOCmdlet
+    public class ImportTermSet : PnPSharePointCmdlet
     {
         [Parameter(Mandatory = true, 
             HelpMessage = "Group to import the term set to; an error is returned if the group does not exist.")]

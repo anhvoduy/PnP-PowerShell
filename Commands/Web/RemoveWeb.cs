@@ -1,15 +1,14 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using web = Microsoft.SharePoint.Client.Web;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 using System;
-using SharePointPnP.PowerShell.Commands.Extensions;
+using PnP.PowerShell.Commands.Extensions;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Remove, "PnPWeb")]
-    [CmdletAlias("Remove-SPOWeb")]
     [CmdletHelp("Removes a subweb in the current web",
         Category = CmdletHelpCategory.Webs)]
     [CmdletExample(
@@ -28,7 +27,7 @@ namespace SharePointPnP.PowerShell.Commands
         SortOrder = 2)]
 
 
-    public class RemoveWeb : SPOWebCmdlet
+    public class RemoveWeb : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The site relative url of the web, e.g. 'Subweb1'", ParameterSetName = "ByUrl")]
         public string Url;

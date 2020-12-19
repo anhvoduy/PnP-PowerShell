@@ -1,8 +1,8 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Publishing
+namespace PnP.PowerShell.Commands.Publishing
 {
     [Cmdlet(VerbsCommon.Set, "PnPDefaultPageLayout")]
     [CmdletHelp("Sets a specific page layout to be the default page layout for a publishing site",
@@ -19,7 +19,7 @@ namespace SharePointPnP.PowerShell.Commands.Publishing
         Code = @"PS:> Set-PnPDefaultPageLayout -InheritFromParentSite",
         Remarks = "Sets the default page layout to be inherited from the parent site",
         SortOrder = 3)]
-    public class SetDefaultPageLayout : SPOWebCmdlet
+    public class SetDefaultPageLayout : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, ParameterSetName = "TITLE", HelpMessage = "Title of the page layout")]
         public string Title = string.Empty;

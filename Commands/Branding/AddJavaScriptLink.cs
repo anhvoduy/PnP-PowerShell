@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Enums;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Enums;
 
-namespace SharePointPnP.PowerShell.Commands.Branding
+namespace PnP.PowerShell.Commands.Branding
 {
     [Cmdlet(VerbsCommon.Add, "PnPJavaScriptLink")]
-    [CmdletAlias("Add-SPOJavaScriptLink")]
-    [CmdletHelp("Adds a link to a JavaScript file to a web or sitecollection",
+    [CmdletHelp("Adds a link to a JavaScript file to a web or sitecollection, valid only for SharePoint classic site experience.",
+        "Creates a custom action that refers to a JavaScript file",
         Category = CmdletHelpCategory.Branding)]
     [CmdletExample(Code = "PS:> Add-PnPJavaScriptLink -Name jQuery -Url https://code.jquery.com/jquery.min.js -Sequence 9999 -Scope Site",
                 Remarks = "Injects a reference to the latest v1 series jQuery library to all pages within the current site collection under the name jQuery and at order 9999",
@@ -16,7 +16,7 @@ namespace SharePointPnP.PowerShell.Commands.Branding
     [CmdletExample(Code = "PS:> Add-PnPJavaScriptLink -Name jQuery -Url https://code.jquery.com/jquery.min.js",
                 Remarks = "Injects a reference to the latest v1 series jQuery library to all pages within the current web under the name jQuery",
                 SortOrder = 2)]
-    public class AddJavaScriptLink : SPOWebCmdlet
+    public class AddJavaScriptLink : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "Name under which to register the JavaScriptLink")]
         [Alias("Key")]
@@ -38,10 +38,12 @@ namespace SharePointPnP.PowerShell.Commands.Branding
 
         protected override void ExecuteCmdlet()
         {
-            // Following code to handle desprecated parameter
+            // Following code to handle deprecated parameter
             CustomActionScope setScope;
 
-            if (MyInvocation.BoundParameters.ContainsKey("SiteScoped"))
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (ParameterSpecified(nameof(SiteScoped)))
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 setScope = CustomActionScope.Site;
             }
@@ -61,7 +63,7 @@ namespace SharePointPnP.PowerShell.Commands.Branding
                     break;
 
                 case CustomActionScope.All:
-                    WriteError(new ErrorRecord(new Exception("Scope parameter can only be set to Web or Site"), "INCORRECTVALUE", ErrorCategory.InvalidArgument, this));
+                    ThrowTerminatingError(new ErrorRecord(new Exception("Scope parameter can only be set to Web or Site"), "INCORRECTVALUE", ErrorCategory.InvalidArgument, this));
                     break;
             }
         }

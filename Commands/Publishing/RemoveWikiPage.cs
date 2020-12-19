@@ -1,19 +1,18 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core.Utilities;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Publishing
+namespace PnP.PowerShell.Commands.Publishing
 {
     [Cmdlet(VerbsCommon.Remove, "PnPWikiPage", ConfirmImpact = ConfirmImpact.High)]
-    [CmdletAlias("Remove-SPOWikiPage")]
     [CmdletHelp("Removes a wiki page",
         Category = CmdletHelpCategory.Publishing)]
     [CmdletExample(
         Code = @"PS:> Remove-PnPWikiPage -PageUrl '/pages/wikipage.aspx'",
         Remarks = "Removes the page '/pages/wikipage.aspx'",
         SortOrder = 1)]
-    public class RemoveWikiPage : SPOWebCmdlet
+    public class RemoveWikiPage : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, Position=0,ValueFromPipeline=true, ParameterSetName = "SERVER")]
         [Alias("PageUrl")]
@@ -29,9 +28,11 @@ namespace SharePointPnP.PowerShell.Commands.Publishing
                 var serverUrl = SelectedWeb.EnsureProperty(w => w.ServerRelativeUrl);
                 ServerRelativePageUrl = UrlUtility.Combine(serverUrl, SiteRelativePageUrl);
             }
-
+#if ONPREMISES
             var file = SelectedWeb.GetFileByServerRelativeUrl(ServerRelativePageUrl);
-
+#else
+            var file = SelectedWeb.GetFileByServerRelativePath(ResourcePath.FromDecodedUrl(ServerRelativePageUrl));
+#endif            
             file.DeleteObject();
 
             ClientContext.ExecuteQueryRetry();

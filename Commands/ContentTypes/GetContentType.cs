@@ -1,13 +1,14 @@
 ﻿using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base;
+using PnP.PowerShell.Commands.Base.PipeBinds;
+using System;
 
-namespace SharePointPnP.PowerShell.Commands.ContentTypes
+namespace PnP.PowerShell.Commands.ContentTypes
 {
     [Cmdlet(VerbsCommon.Get, "PnPContentType")]
-    [CmdletAlias("Get-SPOContentType")]
     [CmdletHelp("Retrieves a content type",
         Category = CmdletHelpCategory.ContentTypes,
         OutputType = typeof(ContentType),
@@ -28,13 +29,13 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
         Code = @"PS:> Get-PnPContentType -List ""Documents""",
         Remarks = @"This will get a listing of all available content types within the list ""Documents""",
         SortOrder = 4)]
-    public class GetContentType : SPOWebCmdlet
+    public class GetContentType : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, Position = 0, ValueFromPipeline = true, HelpMessage = "Name or ID of the content type to retrieve")]
         public ContentTypePipeBind Identity;
-        [Parameter(Mandatory = false, Position = 1, ValueFromPipeline = true, HelpMessage = "List to query")]
+        [Parameter(Mandatory = false, ValueFromPipeline = true, HelpMessage = "List to query")]
         public ListPipeBind List;
-        [Parameter(Mandatory = false, Position = 1, ValueFromPipeline = false, HelpMessage = "Search site hierarchy for content types")]
+        [Parameter(Mandatory = false, ValueFromPipeline = false, HelpMessage = "Search site hierarchy for content types")]
         public SwitchParameter InSiteHierarchy;
 
         protected override void ExecuteCmdlet()
@@ -62,19 +63,41 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
                 else
                 {
                     List list = List.GetList(SelectedWeb);
+                    if (list == null)
+                        throw new PSArgumentException($"No list found with id, title or url '{List}'", "List");
 
                     ClientContext.ExecuteQueryRetry();
+
                     if (!string.IsNullOrEmpty(Identity.Id))
                     {
-                        var cts = ClientContext.LoadQuery(list.ContentTypes.Include(ct => ct.Id, ct => ct.Name, ct => ct.StringId, ct => ct.Group).Where(ct => ct.StringId == Identity.Id));
-                        ClientContext.ExecuteQueryRetry();
-                        WriteObject(cts, true);
+                        if(list.ContentTypeExistsById(Identity.Id))
+                        {
+                            var cts = list.GetContentTypeById(Identity.Id);
+                            ClientContext.Load(cts);
+                            ClientContext.ExecuteQueryRetry();
+                            WriteObject(cts, false);
+                        }
+                        else
+                        {
+                            WriteError(new ErrorRecord(new ArgumentException(String.Format("Content Type Id: {0} does not exist in the list: {1}", Identity.Id, list.Title)), "CONTENTTYPEDOESNOTEXIST", ErrorCategory.InvalidArgument, this));
+                            
+                        }
                     }
-                    else
+                    else if (!string.IsNullOrEmpty(Identity.Name))
                     {
-                        var cts = ClientContext.LoadQuery(list.ContentTypes.Include(ct => ct.Id, ct => ct.Name, ct => ct.StringId, ct => ct.Group).Where(ct => ct.Name == Identity.Name));
-                        ClientContext.ExecuteQueryRetry();
-                        WriteObject(cts, true);
+                        if (list.ContentTypeExistsByName(Identity.Name))
+                        {
+                            var cts = list.GetContentTypeByName(Identity.Name);
+                            ClientContext.Load(cts);
+                            ClientContext.ExecuteQueryRetry();
+                            WriteObject(cts, false);
+                        }
+                        else
+                        {
+                            WriteError(new ErrorRecord(new ArgumentException(String.Format("Content Type Name: {0} does not exist in the list: {1}", Identity.Name, list.Title)), "CONTENTTYPEDOESNOTEXIST", ErrorCategory.InvalidArgument, this));
+                        
+                        }
+                     
                     }
                 }
             }
@@ -86,9 +109,12 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
                     ClientContext.ExecuteQueryRetry();
 
                     WriteObject(cts, true);
-                } else
+                }
+                else
                 {
                     List list = List.GetList(SelectedWeb);
+                    if (list == null)
+                        throw new PSArgumentException($"No list found with id, title or url '{List}'", "List");
                     var cts = ClientContext.LoadQuery(list.ContentTypes.Include(ct => ct.Id, ct => ct.Name, ct => ct.StringId, ct => ct.Group));
                     ClientContext.ExecuteQueryRetry();
                     WriteObject(cts, true);

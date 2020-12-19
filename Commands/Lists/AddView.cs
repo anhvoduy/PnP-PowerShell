@@ -1,12 +1,11 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Lists
+namespace PnP.PowerShell.Commands.Lists
 {
     [Cmdlet(VerbsCommon.Add, "PnPView")]
-    [CmdletAlias("Add-SPOView")]
     [CmdletHelp("Adds a view to a list",
         Category = CmdletHelpCategory.Lists,
           OutputType = typeof(View),
@@ -18,8 +17,12 @@ namespace SharePointPnP.PowerShell.Commands.Lists
     [CmdletExample(
         Code = @"Add-PnPView -List ""Demo List"" -Title ""Demo View"" -Fields ""Title"",""Address"" -Paged",
         Remarks = @"Adds a view named ""Demo view"" to the ""Demo List"" list and makes sure there's paging on this view.",        
-        SortOrder = 2)]        
-    public class AddView : SPOWebCmdlet
+        SortOrder = 2)]
+    [CmdletExample(
+        Code = @"Add-PnPView -List ""Demo List"" -Title ""Demo View"" -Fields ""Title"",""Address"" -Aggregations ""<FieldRef Name='Title' Type='COUNT'/>""",
+        Remarks = @"Adds a view named ""Demo view"" to the ""Demo List"" list and sets the totals (aggregations) to Count on the Title field.",
+        SortOrder = 3)]
+    public class AddView : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0, HelpMessage = "The ID or Url of the list.")]
         public ListPipeBind List;
@@ -46,7 +49,10 @@ namespace SharePointPnP.PowerShell.Commands.Lists
         public SwitchParameter SetAsDefault;
         
         [Parameter(Mandatory = false, HelpMessage = "If specified, the view will have paging.")]
-        public SwitchParameter Paged;        
+        public SwitchParameter Paged;
+
+        [Parameter(Mandatory = false, HelpMessage = "A valid XML fragment containing one or more Aggregations")]
+        public string Aggregations;
 
         protected override void ExecuteCmdlet()
         {
@@ -55,6 +61,13 @@ namespace SharePointPnP.PowerShell.Commands.Lists
             {
                 var view = list.CreateView(Title, ViewType, Fields, RowLimit, SetAsDefault, Query, Personal, Paged);
 
+                if(ParameterSpecified(nameof(Aggregations)))
+                {
+                    view.Aggregations = Aggregations;
+                    view.Update();
+                    list.Context.Load(view);
+                    list.Context.ExecuteQueryRetry();
+                }
                 WriteObject(view);
             }
         }

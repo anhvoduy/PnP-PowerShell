@@ -1,14 +1,13 @@
 ﻿using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
-using SharePointPnP.PowerShell.Commands.Enums;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.Commands.Enums;
 
-namespace SharePointPnP.PowerShell.Commands.Principals
+namespace PnP.PowerShell.Commands.Principals
 {
-    [Cmdlet("Set", "PnPGroup")]
-    [CmdletAlias("Set-SPOGroup")]
+    [Cmdlet(VerbsCommon.Set, "PnPGroup")]
     [CmdletHelp("Updates a group",
         Category = CmdletHelpCategory.Principals)]
     [CmdletExample(
@@ -19,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
         Code = @"PS:> Set-PnPGroup -Identity 'My Site Members' -Owner 'site owners'",
         Remarks = "Sets the SharePoint group with the name 'site owners' as the owner of the SharePoint group with the name 'My Site Members'",
         SortOrder = 2)]
-    public class SetGroup : SPOWebCmdlet
+    public class SetGroup : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "A group object, an ID or a name of a group")]
         public GroupPipeBind Identity = new GroupPipeBind();
@@ -61,14 +60,14 @@ namespace SharePointPnP.PowerShell.Commands.Principals
         {
             var group = Identity.GetGroup(SelectedWeb);
 
-            ClientContext.Load(group, 
-                g => g.AllowMembersEditMembership, 
-                g => g.AllowRequestToJoinLeave, 
+            ClientContext.Load(group,
+                g => g.AllowMembersEditMembership,
+                g => g.AllowRequestToJoinLeave,
                 g => g.AutoAcceptRequestToJoinLeave,
                 g => g.OnlyAllowMembersViewMembership,
                 g => g.RequestToJoinLeaveEmailSetting);
             ClientContext.ExecuteQueryRetry();
-            
+
             if (SetAssociatedGroup != AssociatedGroupType.None)
             {
                 switch (SetAssociatedGroup)
@@ -90,17 +89,17 @@ namespace SharePointPnP.PowerShell.Commands.Principals
                         }
                 }
             }
-            if(!string.IsNullOrEmpty(AddRole))
+            if (!string.IsNullOrEmpty(AddRole))
             {
                 var roleDefinition = SelectedWeb.RoleDefinitions.GetByName(AddRole);
                 var roleDefinitionBindings = new RoleDefinitionBindingCollection(ClientContext);
                 roleDefinitionBindings.Add(roleDefinition);
                 var roleAssignments = SelectedWeb.RoleAssignments;
-                roleAssignments.Add(group,roleDefinitionBindings);
+                roleAssignments.Add(group, roleDefinitionBindings);
                 ClientContext.Load(roleAssignments);
                 ClientContext.ExecuteQueryRetry();
             }
-            if(!string.IsNullOrEmpty(RemoveRole))
+            if (!string.IsNullOrEmpty(RemoveRole))
             {
                 var roleAssignment = SelectedWeb.RoleAssignments.GetByPrincipal(group);
                 var roleDefinitionBindings = roleAssignment.RoleDefinitionBindings;
@@ -123,26 +122,44 @@ namespace SharePointPnP.PowerShell.Commands.Principals
             }
             if (!string.IsNullOrEmpty(Description))
             {
-                group.Description = Description;
-                dirty = true;
+                var groupItem = SelectedWeb.SiteUserInfoList.GetItemById(group.Id);
+                SelectedWeb.Context.Load(groupItem, g => g["Notes"]);
+                SelectedWeb.Context.ExecuteQueryRetry();
+
+                var groupDescription = groupItem["Notes"]?.ToString();
+
+                if (groupDescription != Description)
+                {
+                    groupItem["Notes"] = Description;
+                    groupItem.Update();
+                    dirty = true;
+                }
+
+                var plainTextDescription = OfficeDevPnP.Core.Utilities.PnPHttpUtility.ConvertSimpleHtmlToText(Description, int.MaxValue);
+                if (group.Description != plainTextDescription)
+                {
+                    //If the description is more than 512 characters long a server exception will be thrown.
+                    group.Description = plainTextDescription;
+                    dirty = true;
+                }
             }
-            if (MyInvocation.BoundParameters.ContainsKey("AllowRequestToJoinLeave") && AllowRequestToJoinLeave != group.AllowRequestToJoinLeave)
+            if (ParameterSpecified(nameof(AllowRequestToJoinLeave)) && AllowRequestToJoinLeave != group.AllowRequestToJoinLeave)
             {
                 group.AllowRequestToJoinLeave = AllowRequestToJoinLeave;
                 dirty = true;
-            } 
+            }
 
-            if (MyInvocation.BoundParameters.ContainsKey("AutoAcceptRequestToJoinLeave") && AutoAcceptRequestToJoinLeave != group.AutoAcceptRequestToJoinLeave)
+            if (ParameterSpecified(nameof(AutoAcceptRequestToJoinLeave)) && AutoAcceptRequestToJoinLeave != group.AutoAcceptRequestToJoinLeave)
             {
                 group.AutoAcceptRequestToJoinLeave = AutoAcceptRequestToJoinLeave;
                 dirty = true;
             }
-            if (MyInvocation.BoundParameters.ContainsKey("AllowMembersEditMembership") && AllowMembersEditMembership != group.AllowMembersEditMembership)
+            if (ParameterSpecified(nameof(AllowMembersEditMembership)) && AllowMembersEditMembership != group.AllowMembersEditMembership)
             {
                 group.AllowMembersEditMembership = AllowMembersEditMembership;
                 dirty = true;
             }
-            if (MyInvocation.BoundParameters.ContainsKey("OnlyAllowMembersViewMembership") && OnlyAllowMembersViewMembership != group.OnlyAllowMembersViewMembership)
+            if (ParameterSpecified(nameof(OnlyAllowMembersViewMembership)) && OnlyAllowMembersViewMembership != group.OnlyAllowMembersViewMembership)
             {
                 group.OnlyAllowMembersViewMembership = OnlyAllowMembersViewMembership;
                 dirty = true;
@@ -152,7 +169,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
                 group.RequestToJoinLeaveEmailSetting = RequestToJoinEmail;
                 dirty = true;
             }
-            if(dirty)
+            if (dirty)
             {
                 group.Update();
                 ClientContext.ExecuteQueryRetry();
@@ -178,7 +195,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
                     ClientContext.ExecuteQueryRetry();
                 }
             }
-            
+
         }
     }
 }

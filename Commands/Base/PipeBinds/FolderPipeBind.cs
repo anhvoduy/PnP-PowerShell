@@ -1,7 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
 using System;
 
-namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
+namespace PnP.PowerShell.Commands.Base.PipeBinds
 {
     public sealed class FolderPipeBind
     {
@@ -40,18 +40,9 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
         public Guid Id => _id;
 #endif
 
-        public Folder Folder
-        {
-            get
-            {
-                return _folder;
-            }
-        }
+        public Folder Folder => _folder;
 
-        public string ServerRelativeUrl
-        {
-            get { return _name; }
-        }
+        public string ServerRelativeUrl => _name;
 
         internal Folder GetFolder(Web web)
         {

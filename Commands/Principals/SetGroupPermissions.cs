@@ -1,14 +1,13 @@
 ﻿using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 using System;
 
-namespace SharePointPnP.PowerShell.Commands.Principals
+namespace PnP.PowerShell.Commands.Principals
 {
     [Cmdlet(VerbsCommon.Set, "PnPGroupPermissions")]
-    [CmdletAlias("Set-SPOGroupPermissions")]
     [CmdletHelp("Adds and/or removes permissions of a specific SharePoint group",
         Category = CmdletHelpCategory.Principals)]
     [CmdletExample(
@@ -31,7 +30,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
         Code = @"PS:> Set-PnPGroupPermissions -Identity 'My Site Members' -List 'MyList' -RemoveRole @('Contribute')",
         Remarks = "Removes the 'Contribute' permissions from the list 'MyList' for the group with the name 'My Site Members'",
         SortOrder = 5)]
-    public class SetGroupPermissions : SPOWebCmdlet
+    public class SetGroupPermissions : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = "ByName", HelpMessage = "Get the permissions of a specific group by name")]
         [Alias("Name")]

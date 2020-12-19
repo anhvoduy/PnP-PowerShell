@@ -1,15 +1,18 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Site
+namespace PnP.PowerShell.Commands.Site
 {
     [Cmdlet(VerbsLifecycle.Uninstall, "PnPSolution")]
-    [CmdletAlias("Uninstall-SPOSolution")]
     [CmdletHelp("Uninstalls a sandboxed solution from a site collection",
         Category = CmdletHelpCategory.Sites)]
-    public class UninstallSolution : SPOCmdlet
+    [CmdletExample(
+        Code = @"PS:> Uninstall-PnPSolution -PackageId c2f5b025-7c42-4d3a-b579-41da3b8e7254 -PackageName mypackage.wsp",
+        Remarks = "Removes the package to the current site",
+        SortOrder = 1)]
+    public class UninstallSolution : PnPSharePointCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage="ID of the solution, from the solution manifest")]
         public GuidPipeBind PackageId;

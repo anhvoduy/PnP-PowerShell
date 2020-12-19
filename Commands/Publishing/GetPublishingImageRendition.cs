@@ -1,10 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.Publishing;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Publishing
+namespace PnP.PowerShell.Commands.Publishing
 {
     [Cmdlet(VerbsCommon.Get, "PnPPublishingImageRendition")]
     [CmdletHelp("Returns all image renditions or if Identity is specified a specific one",
@@ -23,14 +23,14 @@ namespace SharePointPnP.PowerShell.Commands.Publishing
         Code = @"PS:> Get-PnPPublishingImageRendition -Identity 2",
         Remarks = @"Returns the image rendition where its id equals 2",
         SortOrder = 3)]
-    public class GetPublishingImageRendition : SPOWebCmdlet
+    public class GetPublishingImageRendition : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, HelpMessage = "Id or name of an existing image rendition", Position = 0, ValueFromPipeline = true)]
         public ImageRenditionPipeBind Identity;
 
         protected override void ExecuteCmdlet()
         {
-            if (MyInvocation.BoundParameters.ContainsKey("Identity"))
+            if (ParameterSpecified(nameof(Identity)))
             {
                 WriteObject(Identity.GetImageRendition(SelectedWeb));
             }

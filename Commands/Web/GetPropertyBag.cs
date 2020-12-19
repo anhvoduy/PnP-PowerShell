@@ -1,13 +1,12 @@
 ﻿using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using OfficeDevPnP.Core.Utilities;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Get, "PnPPropertyBag")]
-    [CmdletAlias("Get-SPOPropertyBag")]
     [CmdletHelp("Returns the property bag values.",
         Category = CmdletHelpCategory.Webs,
         OutputType = typeof(PropertyBagValue))]
@@ -28,10 +27,10 @@ namespace SharePointPnP.PowerShell.Commands
        Remarks = "This will return the value of the key vti_mykey from the folder MyFolder which is located in the root of the current web",
        SortOrder = 4)]
     [CmdletExample(
-     Code = @"PS:> Get-PnPPropertyBag -Folder / -Key vti_mykey",
-     Remarks = "This will return the value of the key vti_mykey from the root folder of the current web",
-     SortOrder = 5)]
-    public class GetPropertyBag : SPOWebCmdlet
+        Code = @"PS:> Get-PnPPropertyBag -Folder / -Key vti_mykey",
+        Remarks = "This will return the value of the key vti_mykey from the root folder of the current web",
+        SortOrder = 5)]
+    public class GetPropertyBag : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, Position = 0, ValueFromPipeline = true, HelpMessage = "Key that should be looked up")]
         public string Key = string.Empty;
@@ -62,8 +61,11 @@ namespace SharePointPnP.PowerShell.Commands
                 SelectedWeb.EnsureProperty(w => w.ServerRelativeUrl);
                 
                 var folderUrl = UrlUtility.Combine(SelectedWeb.ServerRelativeUrl, Folder);
+#if ONPREMISES
                 var folder = SelectedWeb.GetFolderByServerRelativeUrl(folderUrl);
-
+#else
+                var folder = SelectedWeb.GetFolderByServerRelativePath(ResourcePath.FromDecodedUrl(folderUrl));
+#endif
                 folder.EnsureProperty(f => f.Properties);
                 
                 if (!string.IsNullOrEmpty(Key))

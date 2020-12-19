@@ -1,11 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Principals
+namespace PnP.PowerShell.Commands.Principals
 {
-    [Cmdlet("New", "PnPUser")]
-    [CmdletAlias("New-SPOUser")]
+    [Cmdlet(VerbsCommon.New, "PnPUser")]
     [CmdletHelp("Adds a user to the built-in Site User Info List and returns a user object",
         Category = CmdletHelpCategory.Principals,
         OutputType = typeof(User),
@@ -14,7 +13,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
         Code = @"PS:> New-PnPUser -LoginName user@company.com",
         SortOrder = 1,
         Remarks = "Adds a new user with the login user@company.com to the current site")]
-    public class NewUser : SPOWebCmdlet
+    public class NewUser : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The users login name (user@company.com)")]
         [Alias("LogonName")]

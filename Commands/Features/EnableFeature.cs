@@ -1,13 +1,12 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
-using SharePointPnP.PowerShell.Commands.Enums;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.Commands.Enums;
 
-namespace SharePointPnP.PowerShell.Commands.Features
+namespace PnP.PowerShell.Commands.Features
 {
     [Cmdlet(VerbsLifecycle.Enable, "PnPFeature")]
-    [CmdletAlias("Enable-SPOFeature")]
     [CmdletHelp("Enables a feature", Category = CmdletHelpCategory.Features)]
     [CmdletExample(
         Code = "PS:> Enable-PnPFeature -Identity 99a00f6e-fb81-4dc7-8eac-e09c6f9132fe", 
@@ -21,12 +20,12 @@ namespace SharePointPnP.PowerShell.Commands.Features
         Code = "PS:> Enable-PnPFeature -Identity 99a00f6e-fb81-4dc7-8eac-e09c6f9132fe -Scope Web",
         Remarks = @"This will enable the feature with the id ""99a00f6e-fb81-4dc7-8eac-e09c6f9132fe"" with the web scope.",  
         SortOrder = 3)]
-    public class EnableFeature : SPOWebCmdlet
+    public class EnableFeature : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, Position=0, ValueFromPipeline=true, HelpMessage = "The id of the feature to enable.")]
         public GuidPipeBind Identity;
 
-        [Parameter(Mandatory = false, HelpMessage = "Forcibly enable the feature.")]
+        [Parameter(Mandatory = false, HelpMessage = "Specifies whether to overwrite an existing feature with the same feature identifier. This parameter is ignored if there are no errors.")]
         public SwitchParameter Force;
 
         [Parameter(Mandatory = false, HelpMessage = "Specify the scope of the feature to activate, either Web or Site. Defaults to Web.")]

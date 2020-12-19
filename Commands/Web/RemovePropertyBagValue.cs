@@ -1,12 +1,11 @@
 ﻿using Microsoft.SharePoint.Client;
 using System.Management.Automation;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using OfficeDevPnP.Core.Utilities;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Remove, "PnPPropertyBagValue", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.High)]
-    [CmdletAlias("Remove-SPOPropertyBagValue")]
     [CmdletHelp("Removes a value from the property bag",
         Category = CmdletHelpCategory.Webs)]
     [CmdletExample(
@@ -21,7 +20,7 @@ namespace SharePointPnP.PowerShell.Commands
         Code = @"PS:> Remove-PnPPropertyBagValue -Key MyKey -Folder /",
         Remarks = "This will remove the value with key MyKey from the root folder of the current web",
         SortOrder = 3)]
-    public class RemovePropertyBagValue : SPOWebCmdlet
+    public class RemovePropertyBagValue : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, HelpMessage = "Key of the property bag value to be removed")]
         public string Key;
@@ -49,7 +48,11 @@ namespace SharePointPnP.PowerShell.Commands
                 SelectedWeb.EnsureProperty(w => w.ServerRelativeUrl);
 
                 var folderUrl = UrlUtility.Combine(SelectedWeb.ServerRelativeUrl, Folder);
+#if ONPREMISES
                 var folder = SelectedWeb.GetFolderByServerRelativeUrl(folderUrl);
+#else
+                var folder = SelectedWeb.GetFolderByServerRelativePath(ResourcePath.FromDecodedUrl(folderUrl));
+#endif
 
                 folder.EnsureProperty(f => f.Properties);
 

@@ -1,13 +1,12 @@
 ﻿using System.Management.Automation;
+using System.Text.Json;
 using Microsoft.SharePoint.Client;
-using Newtonsoft.Json;
 using OfficeDevPnP.Core.Framework.Provisioning.Model;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Branding
+namespace PnP.PowerShell.Commands.Branding
 {
     [Cmdlet(VerbsCommon.Get, "PnPTheme")]
-    [CmdletAlias("Get-SPOTheme")]
     [CmdletHelp("Returns the current theme/composed look of the current web.",
         Category = CmdletHelpCategory.Branding,
         OutputType = typeof(OfficeDevPnP.Core.Entities.ThemeEntity))]
@@ -19,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.Branding
         Code = @"PS:> Get-PnPTheme -DetectCurrentComposedLook",
         Remarks = "Returns the current composed look of the current web, and will try to detect the currently applied composed look based upon the actual site. Without this switch the cmdlet will first check for the presence of a property bag variable called _PnP_ProvisioningTemplateComposedLookInfo that contains composed look information when applied through the provisioning engine or the Set-PnPTheme cmdlet.",
         SortOrder = 2)]
-    public class GetTheme : SPOWebCmdlet
+    public class GetTheme : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, HelpMessage = "Specify this switch to not use the PnP Provisioning engine based composed look information but try to detect the current composed look as is.")]
         public SwitchParameter DetectCurrentComposedLook;
@@ -31,7 +30,7 @@ namespace SharePointPnP.PowerShell.Commands.Branding
                 try
                 {
                     WriteWarning("The information presented here is based upon the fact that the theme has been set using either the PnP Provisioning Engine or using the Set-PnPTheme cmdlet. This information is retrieved from a propertybag value and may differ from the actual site.");
-                    var composedLook = JsonConvert.DeserializeObject<ComposedLook>(SelectedWeb.GetPropertyBagValueString("_PnP_ProvisioningTemplateComposedLookInfo", ""));
+                    var composedLook = JsonSerializer.Deserialize<ComposedLook>(SelectedWeb.GetPropertyBagValueString("_PnP_ProvisioningTemplateComposedLookInfo", ""));
                     WriteObject(composedLook);
                 }
                 catch

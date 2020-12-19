@@ -1,17 +1,22 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using System;
 using System.Management.Automation;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using Microsoft.SharePoint.Client;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands.Apps
 {
+#if !ONPREMISES
+    [Obsolete("Use Uninstall-PnPApp instead")]
+#endif
     [Cmdlet(VerbsLifecycle.Uninstall, "PnPAppInstance", SupportsShouldProcess = true)]
-    [CmdletAlias("Uninstall-SPOAppInstance")]
-    [CmdletHelp("Removes an app from a site", Category = CmdletHelpCategory.Apps)]
+    [CmdletHelp("Removes an app from a site",
+        "Removes an add-in/app that has been installed to a site.",
+        Category = CmdletHelpCategory.Apps)]
     [CmdletExample(Code = @"PS:> Uninstall-PnPAppInstance -Identity $appinstance", Remarks = "Uninstalls the app instance which was retrieved with the command Get-PnPAppInstance", SortOrder = 1)]
     [CmdletExample(Code = @"PS:> Uninstall-PnPAppInstance -Identity 99a00f6e-fb81-4dc7-8eac-e09c6f9132fe", Remarks = "Uninstalls the app instance with the ID '99a00f6e-fb81-4dc7-8eac-e09c6f9132fe'", SortOrder = 2)]
     [CmdletExample(Code = @"PS:> Uninstall-PnPAppInstance -Identity 99a00f6e-fb81-4dc7-8eac-e09c6f9132fe -force", Remarks = "Uninstalls the app instance with the ID '99a00f6e-fb81-4dc7-8eac-e09c6f9132fe' and do not ask for confirmation", SortOrder = 3)]
-    public class UninstallAppInstance : SPOWebCmdlet
+    public class UninstallAppInstance : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, ValueFromPipeline = true, HelpMessage = "Appinstance or Id of the addin to remove.")]
         public AppPipeBind Identity;
@@ -23,18 +28,11 @@ namespace SharePointPnP.PowerShell.Commands
         {
             AppInstance instance;
 
-            if (Identity.Instance != null)
-            {
-                instance = Identity.Instance;
-            }
-            else
-            {
-                instance = SelectedWeb.GetAppInstanceById(Identity.Id);
-            }
+            instance = Identity.GetAppInstance(SelectedWeb);
 
-            if(instance != null)
+            if (instance != null)
             {
-                if(!instance.IsObjectPropertyInstantiated("Title"))
+                if (!instance.IsObjectPropertyInstantiated("Title"))
                 {
                     ClientContext.Load(instance, i => i.Title);
                     ClientContext.ExecuteQueryRetry();

@@ -5,9 +5,9 @@ using System.Security;
 using System.Net;
 using Core = OfficeDevPnP.Core;
 using System.Threading;
-using SharePointPnP.PowerShell.Commands.Base;
+using PnP.PowerShell.Commands.Base;
 
-namespace SharePointPnP.PowerShell.Tests
+namespace PnP.PowerShell.Tests
 {
     static class TestCommon
     {
@@ -77,6 +77,7 @@ namespace SharePointPnP.PowerShell.Tests
         #region Properties
         public static string TenantUrl { get; set; }
         public static string DevSiteUrl { get; set; }
+        public static string Dev2SiteUrl { get; set; }
         static string UserName { get; set; }
         static SecureString Password { get; set; }
         static ICredentials Credentials { get; set; }
@@ -91,12 +92,25 @@ namespace SharePointPnP.PowerShell.Tests
                 return ConfigurationManager.AppSettings["AzureStorageKey"];
             }
         }
+
+        public static string WebHookTestUrl
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["WebHookTestUrl"];
+            }
+        }
         #endregion
 
         #region Methods
         public static ClientContext CreateClientContext()
         {
             return CreateContext(DevSiteUrl, Credentials);
+        }
+
+        public static ClientContext CreateClientContext(string siteUrl)
+        {
+            return CreateContext(siteUrl, Credentials);
         }
 
         public static ClientContext CreateTenantClientContext()
@@ -130,18 +144,18 @@ namespace SharePointPnP.PowerShell.Tests
             {
                 OfficeDevPnP.Core.AuthenticationManager am = new OfficeDevPnP.Core.AuthenticationManager();
 
-                if (new Uri(DevSiteUrl).DnsSafeHost.Contains("spoppe.com"))
+                if (new Uri(contextUrl).DnsSafeHost.Contains("spoppe.com"))
                 {
-                    context = am.GetAppOnlyAuthenticatedContext(DevSiteUrl, SPOnlineConnectionHelper.GetRealmFromTargetUrl(new Uri(DevSiteUrl)), AppId, AppSecret, acsHostUrl: "windows-ppe.net", globalEndPointPrefix: "login");
+                    context = am.GetAppOnlyAuthenticatedContext(contextUrl, PnPConnectionHelper.GetRealmFromTargetUrl(new Uri(contextUrl)), AppId, AppSecret, acsHostUrl: "windows-ppe.net", globalEndPointPrefix: "login");
                 }
                 else
                 {
-                    context = am.GetAppOnlyAuthenticatedContext(DevSiteUrl, AppId, AppSecret);
+                    context = am.GetAppOnlyAuthenticatedContext(contextUrl, AppId, AppSecret);
                 }
             }
             else
             {
-                context = new ClientContext(DevSiteUrl);
+                context = new ClientContext(contextUrl);
                 context.Credentials = Credentials;
             }
 
@@ -159,6 +173,12 @@ namespace SharePointPnP.PowerShell.Tests
                 secureString.AppendChar(c);
 
             return secureString;
+        }
+
+        public static string GetTenantRootUrl(ClientContext ctx)
+        {
+            var uri = new Uri(ctx.Url);
+            return $"https://{uri.DnsSafeHost}";
         }
         #endregion
     }

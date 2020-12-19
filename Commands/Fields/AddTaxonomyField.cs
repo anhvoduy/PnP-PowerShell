@@ -3,14 +3,14 @@ using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.Taxonomy;
 using OfficeDevPnP.Core.Entities;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Fields
+namespace PnP.PowerShell.Commands.Fields
 {
     [Cmdlet(VerbsCommon.Add, "PnPTaxonomyField")]
-    [CmdletAlias("Add-SPOTaxonomyField")]
-    [CmdletHelp("Adds a taxonomy field to a list or as a site column.",
+    [CmdletHelp("Add a taxonomy field",
+        "Adds a taxonomy/managed metadata field to a list or as a site column.",
         Category = CmdletHelpCategory.Fields,
         OutputType = typeof(Field),
         OutputTypeLink = "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.field.aspx")]
@@ -18,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.Fields
         Code = @"PS:> Add-PnPTaxonomyField -DisplayName ""Test"" -InternalName ""Test"" -TermSetPath ""TestTermGroup|TestTermSet""",
         Remarks = @"Adds a new taxonomy field called ""Test"" that points to the TestTermSet which is located in the TestTermGroup",
         SortOrder = 1)]
-    public class AddTaxonomyField : SPOWebCmdlet
+    public class AddTaxonomyField : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, ParameterSetName = ParameterAttribute.AllParameterSets, HelpMessage = "The list object or name where this field needs to be added")]
         public ListPipeBind List;
@@ -29,7 +29,7 @@ namespace SharePointPnP.PowerShell.Commands.Fields
         [Parameter(Mandatory = true, ParameterSetName = ParameterAttribute.AllParameterSets, HelpMessage = "The internal name of the field")]
         public string InternalName;
 
-        [Parameter(Mandatory = true, ParameterSetName = "Path", HelpMessage = "The path to the term that this needs be be bound")]
+        [Parameter(Mandatory = true, ParameterSetName = "Path", HelpMessage = "The path to the term that this needs to be bound")]
         public string TermSetPath;
 
         [Parameter(Mandatory = false, ParameterSetName = "Id", HelpMessage = "The ID of the Taxonomy item")]
@@ -81,7 +81,7 @@ namespace SharePointPnP.PowerShell.Commands.Fields
                     }
                     catch
                     {
-                        throw new Exception(string.Format("Taxonomy Item with Id {0} not found", TaxonomyItemId.Id));
+                        throw new Exception($"Taxonomy Item with Id {TaxonomyItemId.Id} not found");
                     }
                 }
                 taxItem.EnsureProperty(t => t.Id);

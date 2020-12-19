@@ -148,10 +148,10 @@
     <value>Health score not sufficient</value>
   </data>
   <data name="ListNotFound" xml:space="preserve">
-    <value>List not found</value>
+    <value>No list found with id, title or url '{0}'</value>
   </data>
-  <data name="NoConnection" xml:space="preserve">
-    <value>No connection, please connect first with Connect-PnPOnline</value>
+  <data name="NoSharePointConnection" xml:space="preserve">
+    <value>The current connection holds no SharePoint context. Please use one of the Connect-PnPOnline commands which uses the -Url argument to connect.</value>
   </data>
   <data name="NoConnectionToDisconnect" xml:space="preserve">
     <value>No connection to disconnect</value>
@@ -169,7 +169,7 @@
     <value>Remove custom action?</value>
   </data>
   <data name="RemoveEventReceiver" xml:space="preserve">
-    <value>Remove event receiver?</value>
+    <value>Remove event receiver named '{0}' with id '{1}'?</value>
   </data>
   <data name="RemoveJavaScript0" xml:space="preserve">
     <value>Remove JavaScript ('{0}')?</value>
@@ -216,10 +216,6 @@
   <data name="RemoveListItemWithId0" xml:space="preserve">
     <value>Remove list item with ID {0}?</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="pnp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pnp.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="RemoveTermGroup0AndAllUnderlyingTermSetsAndTerms" xml:space="preserve">
     <value>Remove Termgroup '{0}' and all underlying Termsets and Terms? </value>
   </data>
@@ -228,9 +224,6 @@
   </data>
   <data name="RemoveTerm0AndAllUnderlyingTerms" xml:space="preserve">
     <value>Remove Term '{0}' and all underlying Terms?</value>
-  </data>
-  <data name="NoAzureADAccessToken" xml:space="preserve">
-    <value>No Azure AD connection, please connect first with Connect-PnPMicrosoftGraph</value>
   </data>
   <data name="MicrosoftGraphOAuthAccessTokenExpired" xml:space="preserve">
     <value>The Azure AD OAuth 2.0 Access Token has expired. Authenticate again using the Connect-PnPMicrosoftGraph cmdlet.</value>
@@ -243,6 +236,9 @@
   </data>
   <data name="MoveFile0To1" xml:space="preserve">
     <value>Move file '{0}' to '{1}'?</value>
+  </data>
+  <data name="MoveListItemWithId0ToRecycleBin" xml:space="preserve">
+    <value>Move list item with ID {0} to Recycle Bin?</value>
   </data>
   <data name="RenameFile0To1" xml:space="preserve">
     <value>Rename file '{0}' to '{1}'?</value>
@@ -279,5 +275,86 @@
   </data>
   <data name="CreateSiteWithUrl0" xml:space="preserve">
     <value>Create site with url '{0}'?</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>List</value>
+  </data>
+  <data name="RemoveWebhookSubscription0From1_2" xml:space="preserve">
+    <value>Remove Webhook Subscription '{0}' from {1} '{2}' ?</value>
+  </data>
+  <data name="RemoveClientSidePage" xml:space="preserve">
+    <value>Remove Client-Side Page?</value>
+  </data>
+  <data name="RemoveUser" xml:space="preserve">
+    <value>Remove User with Id {0}, LoginName '{1}', Email '{2}' from the User Information List?</value>
+  </data>
+  <data name="RemoveDefaultClassification0" xml:space="preserve">
+    <value>The classification '{0}' you are trying remove is currently set as the default classification. Do you want to remove this classification? It will also remove this as  the default classification</value>
+  </data>
+  <data name="RemoveSiteDesign" xml:space="preserve">
+    <value>Remove site design?</value>
+  </data>
+  <data name="RemoveSiteScript" xml:space="preserve">
+    <value>Remove site script?</value>
+  </data>
+  <data name="RemoveWebPartWithTitle0" xml:space="preserve">
+    <value>Remove Web Part with title '{0}'?</value>
+  </data>
+  <data name="RemoveComponentWithInstanceId0" xml:space="preserve">
+    <value>Remove component with instance id '{0}'?</value>
+  </data>
+  <data name="RemoveNavigationNodeInLocation" xml:space="preserve">
+    <value>Remove all Navigation Nodes in {0}?</value>
+  </data>
+  <data name="RemoveSiteDesignTask" xml:space="preserve">
+    <value>Remove site design task?</value>
+  </data>
+  <data name="NoTenantAdminUrlSpecified" xml:space="preserve">
+    <value>No Tenant Administration Url specified. Connect with Connect-PnPOnline and specify the TenantAdminUrl parameter.</value>
+  </data>
+  <data name="SiteNotFound" xml:space="preserve">
+    <value>The provided site could not be found</value>
+  </data>
+  <data name="SetRequestAccessEmailsOnlyOneAddressAllowed" xml:space="preserve">
+    <value>Only one e-mail address can be configured to receive the access requests</value>
+  </data>
+  <data name="NoApiAccessToken" xml:space="preserve">
+    <value>Unable to retrieve a token for {0}. Ensure you connect using one of the Connect-PnPOnline commands which uses the -ClientId argument or use Connect-PnPOnline -Scopes to connect.</value>
+  </data>
+  <data name="NoConnection" xml:space="preserve">
+    <value>There is currently no connection yet. Use Connect-PnPOnline to connect.</value>
+  </data>
+  <data name="AccessTokenConnectFailed" xml:space="preserve">
+    <value>No URL specified nor does the provided access token contain an audience</value>
+  </data>
+  <data name="CertificateWithThumbprintNotFound" xml:space="preserve">
+    <value>No certificate with the thumbprint '{0}' has been found in the Windows Certificate Store</value>
+  </data>
+  <data name="ClientCertificateInvalid" xml:space="preserve">
+    <value>The client certificate is invalid</value>
+  </data>
+  <data name="GrooveBlockOptionNotSupported" xml:space="preserve">
+    <value>The provided option for {0} being {1} is not yet supported in this cmdlet</value>
+  </data>
+  <data name="ParameterSetNotImplemented" xml:space="preserve">
+    <value>Parameter set {0} has not yet been implemented. Please create an issue for this on GitHub.</value>
+  </data>
+  <data name="WebhooksOnlySupportsLists" xml:space="preserve">
+    <value>This Cmdlet currently only supports List Webhooks</value>
+  </data>
+  <data name="CertificateAtPathHasNoPrivateKey" xml:space="preserve">
+    <value>The certificate located at '{0}' holds no private key. Ensure you provide the private key certificate, typically the .pfx file.</value>
+  </data>
+  <data name="CertificateNotFoundAtPath" xml:space="preserve">
+    <value>No private key certificate has been found at '{0}'</value>
+  </data>
+  <data name="PrivateKeyCertificateImportFailedPasswordIncorrect" xml:space="preserve">
+    <value>Reading of the private key certificate failed as the password with which it has been signed does not match the provided password. Use {0} to provide the proper password for the private key certificate file.</value>
+  </data>
+  <data name="PrivateKeyCertificateImportFailedPasswordMissing" xml:space="preserve">
+    <value>Reading of the private key certificate failed as the password with which it has been signed has not been provided. Use {0} to provide the password.</value>
+  </data>
+  <data name="CertificateWithThumbprintDoesNotHavePrivateKey" xml:space="preserve">
+    <value>The provided certificate with the thumbprint '{0}' does not have a private key which is required for a connection to be established. Ensure you have imported the certificate containing the private key, typically the .pfx file, into the Windows Certificate Store.</value>
   </data>
 </root>

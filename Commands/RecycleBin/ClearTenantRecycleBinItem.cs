@@ -3,11 +3,11 @@ using System;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base;
-using Resources = SharePointPnP.PowerShell.Commands.Properties.Resources;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base;
+using Resources = PnP.PowerShell.Commands.Properties.Resources;
 
-namespace SharePointPnP.PowerShell.Commands.RecycleBin
+namespace PnP.PowerShell.Commands.RecycleBin
 {
     [Cmdlet(VerbsCommon.Clear, "PnPTenantRecycleBinItem")]
     [CmdletHelp("Permanently deletes a site collection from the tenant scoped recycle bin", 
@@ -19,7 +19,7 @@ namespace SharePointPnP.PowerShell.Commands.RecycleBin
     [CmdletExample(
         Code = @"PS:> Clear-PnPTenantRecycleBinItem -Url https://tenant.sharepoint.com/sites/contoso -Wait",
         Remarks = @"This will permanently delete site collection with the url 'https://tenant.sharepoint.com/sites/contoso' from the tenant recycle bin and will wait with executing further PowerShell commands until the operation has completed", SortOrder = 2)]
-    public class ClearTenantRecycleBinItem : SPOAdminCmdlet
+    public class ClearTenantRecycleBinItem : PnPAdminCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "Url of the site collection to permanently delete from the tenant recycle bin", ValueFromPipeline = false)]
         public string Url;

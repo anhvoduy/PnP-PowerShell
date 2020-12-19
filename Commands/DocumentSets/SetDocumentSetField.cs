@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.DocumentSets
+namespace PnP.PowerShell.Commands.DocumentSets
 {
     [Cmdlet(VerbsCommon.Set, "PnPDocumentSetField")]
-    [CmdletAlias("Set-SPODocumentSetField")]
     [CmdletHelp("Sets a site column from the available content types to a document set", 
         Category = CmdletHelpCategory.DocumentSets)]
     [CmdletExample(
@@ -19,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.DocumentSets
         Code = @"PS:> Set-PnPDocumentSetField -Field ""Test Field"" -DocumentSet ""Test Document Set"" -RemoveSharedField -RemoveWelcomePageField",
         Remarks = "This will remove the field, available in one of the available content types, as a Shared Field and as a Welcome Page Field.",
         SortOrder = 1)]
-    public class SetFieldInDocumentSet : SPOWebCmdlet
+    public class SetFieldInDocumentSet : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The document set in which to set the field. Either specify a name, a document set template object, an id, or a content type object")]
         public DocumentSetPipeBind DocumentSet;
@@ -41,12 +40,12 @@ namespace SharePointPnP.PowerShell.Commands.DocumentSets
 
         protected override void ExecuteCmdlet()
         {
-            if (MyInvocation.BoundParameters.ContainsKey("SetSharedField") && MyInvocation.BoundParameters.ContainsKey("RemoveSharedField"))
+            if (ParameterSpecified(nameof(SetSharedField)) && ParameterSpecified(nameof(RemoveSharedField)))
             {
                 WriteWarning("Cannot set and remove a shared field at the same time");
                 return;
             }
-            if (MyInvocation.BoundParameters.ContainsKey("SetWelcomePageField") && MyInvocation.BoundParameters.ContainsKey("RemoveWelcomePageField"))
+            if (ParameterSpecified(nameof(SetWelcomePageField)) && ParameterSpecified(nameof(RemoveWelcomePageField)))
             {
                 WriteWarning("Cannot set and remove a welcome page field at the same time");
                 return;

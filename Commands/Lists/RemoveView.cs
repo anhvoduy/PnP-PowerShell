@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Lists
+namespace PnP.PowerShell.Commands.Lists
 {
     [Cmdlet(VerbsCommon.Remove, "PnPView", SupportsShouldProcess = true)]
-    [CmdletAlias("Remove-SPOView")]
     [CmdletHelp("Deletes a view from a list",
         Category = CmdletHelpCategory.Lists)]
     [CmdletExample(
         Code = @"PS:> Remove-PnPView -List ""Demo List"" -Identity ""All Items""",
         SortOrder = 1,
         Remarks = @"Removes the view with title ""All Items"" from the ""Demo List"" list.")]
-    public class RemoveView : SPOWebCmdlet
+    public class RemoveView : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0, HelpMessage = "The ID or Title of the view.")]
         public ViewPipeBind Identity = new ViewPipeBind();

@@ -1,31 +1,33 @@
 ﻿using System;
 using System.Management.Automation;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using System.Net;
+using Microsoft.SharePoint.Client;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Get, "PnPAuthenticationRealm")]
-    [CmdletAlias("Get-SPOAuthenticationRealm")]
-    [CmdletHelp("Gets the authentication realm for the current web", 
+    [CmdletHelp("Returns the authentication realm", 
+        "Gets the authentication realm for the current web",
+        OutputType = typeof(string),
         Category = CmdletHelpCategory.Base)]
     [CmdletExample(
-        Code = @"PS:> Get-PnPAuthenticationRealm", 
+        Code = @"PS:> Get-PnPAuthenticationRealm",
         Remarks = @"This will get the authentication realm for the current connected site",
         SortOrder = 1)]
     [CmdletExample(
         Code = @"PS:> Get-PnPAuthenticationRealm -Url https://contoso.sharepoint.com",
         Remarks = @"This will get the authentication realm for https://contoso.sharepoint.com",
         SortOrder = 2)]
-    public class GetAuthenticationRealm : SPOCmdlet
+    public class GetAuthenticationRealm : PnPSharePointCmdlet
     {
 
-        [Parameter(Mandatory = false, Position=0, ValueFromPipeline=true, HelpMessage = "Specifies the URL of the site")]
+        [Parameter(Mandatory = false, Position = 0, ValueFromPipeline = true, HelpMessage = "Specifies the URL of the site")]
         public string Url;
 
         protected override void ProcessRecord()
         {
-            if(string.IsNullOrEmpty(Url))
+            if (string.IsNullOrEmpty(Url))
             {
                 Url = ClientContext.Url;
             }

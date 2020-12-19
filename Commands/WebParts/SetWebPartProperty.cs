@@ -2,28 +2,31 @@
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core.Utilities;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.WebParts
+namespace PnP.PowerShell.Commands.WebParts
 {
     [Cmdlet(VerbsCommon.Set, "PnPWebPartProperty")]
-    [CmdletAlias("Set-SPOWebPartProperty")]
     [CmdletHelp("Sets a web part property",
         Category = CmdletHelpCategory.WebParts)]
-    public class SetWebPartProperty : SPOWebCmdlet
+    [CmdletExample(
+        Code = @"PS:> Set-PnPWebPartProperty -ServerRelativePageUrl /sites/demo/sitepages/home.aspx -Identity ccd2c98a-c9ae-483b-ae72-19992d583914 -Key ""Title"" -Value ""New Title"" ",
+        Remarks = "Sets the title property of the web part.",
+        SortOrder = 1)]
+    public class SetWebPartProperty : PnPWebCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, HelpMessage = "Full server relative url of the web part page, e.g. /sites/demo/sitepages/home.aspx")]
         [Alias("PageUrl")]
         public string ServerRelativePageUrl = string.Empty;
 
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, HelpMessage = "The Guid of the web part")]
         public GuidPipeBind Identity;
 
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, HelpMessage = "Name of a single property to be set")]
         public string Key = string.Empty;
 
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, HelpMessage = "Value of the property to be set")]
         public PSObject Value = string.Empty;
 
         protected override void ExecuteCmdlet()
@@ -48,7 +51,7 @@ namespace SharePointPnP.PowerShell.Commands.WebParts
             }
             else
             {
-                WriteError(new ErrorRecord(new Exception("Type of value is not supported. Has to be of type string, int or bool"), "UNSUPPORTEDTYPE",ErrorCategory.InvalidType, this));
+                ThrowTerminatingError(new ErrorRecord(new Exception("Type of value is not supported. Has to be of type string, int or bool"), "UNSUPPORTEDTYPE",ErrorCategory.InvalidType, this));
             }
         }
     }

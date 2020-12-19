@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.SharePoint.Client.WorkflowServices;
 
-namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
+namespace PnP.PowerShell.Commands.Base.PipeBinds
 {
     public sealed class WorkflowDefinitionPipeBind
     {
@@ -34,22 +34,10 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
             }
         }
 
-        public Guid Id
-        {
-            get { return _id; }
-        }
+        public Guid Id => _id;
 
-        public WorkflowDefinition Definition
-        {
-            get
-            {
-                return _def;
-            }
-        }
+        public WorkflowDefinition Definition => _def;
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
     }
 }

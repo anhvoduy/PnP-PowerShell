@@ -1,11 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Publishing
+namespace PnP.PowerShell.Commands.Publishing
 {
     [Cmdlet(VerbsCommon.Add, "PnPMasterPage")]
-    [CmdletAlias("Add-SPOMasterPage")]
     [CmdletHelp("Adds a Masterpage",
         Category = CmdletHelpCategory.Publishing,
         OutputType = typeof(File),
@@ -14,7 +13,7 @@ namespace SharePointPnP.PowerShell.Commands.Publishing
         Code = @"PS:> Add-PnPMasterPage -SourceFilePath ""page.master"" -Title ""MasterPage"" -Description ""MasterPage for Web"" -DestinationFolderHierarchy ""SubFolder""",
         Remarks = @"Adds a MasterPage from the local file ""page.master"" to the folder ""SubFolder"" in the Masterpage gallery.",
         SortOrder = 1)]
-    public class AddMasterPage : SPOWebCmdlet
+    public class AddMasterPage : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "Path to the file which will be uploaded")]
         public string SourceFilePath = string.Empty;

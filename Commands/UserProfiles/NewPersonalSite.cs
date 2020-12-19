@@ -2,15 +2,15 @@
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base;
 
-namespace SharePointPnP.PowerShell.Commands.UserProfiles
+namespace PnP.PowerShell.Commands.UserProfiles
 {
 
     [Cmdlet(VerbsCommon.New, "PnPPersonalSite")]
-    [CmdletAlias("New-SPOPersonalSite")]
     [CmdletHelp(@"Office365 only: Creates a personal / OneDrive For Business site",
+        SupportedPlatform = CmdletSupportedPlatform.Online,
         Category = CmdletHelpCategory.UserProfiles)]
     [CmdletExample(
         Code = @"PS:> $users = ('katiej@contoso.onmicrosoft.com','garth@contoso.onmicrosoft.com')
@@ -18,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.UserProfiles
         Remarks = "Creates a personal / OneDrive For Business site for the 2 users in the variable $users",
         SortOrder = 1)]
 
-    public class NewPersonalSite : SPOAdminCmdlet
+    public class NewPersonalSite : PnPAdminCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The UserPrincipalName (UPN) of the users", Position = 0)]
         public string[] Email;

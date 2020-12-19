@@ -1,15 +1,14 @@
 ﻿using Microsoft.SharePoint.Client;
 using web = Microsoft.SharePoint.Client.Web;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.InvokeAction;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.InvokeAction;
 using System;
 using System.Collections.Generic;
 using System.Management.Automation;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands
 {
     [Cmdlet(VerbsLifecycle.Invoke, "PnPWebAction", SupportsShouldProcess = true)]
-    [CmdletAlias("Invoke-SPOWebAction")]
     [CmdletHelp("Executes operations on web, lists and list items.",
         Category = CmdletHelpCategory.Webs)]
     [CmdletExample(
@@ -20,7 +19,7 @@ namespace SharePointPnP.PowerShell.Commands
         Code = @"PS:> Invoke-PnPWebAction -ShouldProcessListAction ${function:ShouldProcessList} -ListAction ${function:ListAction}",
         Remarks = "This will call the function ShouldProcessList, if it returns true the function ListAction will then be called. This will occur on all lists located on the current web",
         SortOrder = 2)]
-    public class InvokeWebAction : SPOWebCmdlet
+    public class InvokeWebAction : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, HelpMessage = "Webs you want to process (for example different site collections), will use Web parameter if not specified")]
         public web[] Webs;
@@ -41,7 +40,6 @@ namespace SharePointPnP.PowerShell.Commands
         public string[] WebProperties;
 
         [Parameter(Mandatory = false, HelpMessage = "Name of list if you only want to handle one specific list and its list items")]
-
         public string ListName { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Function to be executed on the list. There is one input parameter of type List")]
@@ -77,12 +75,11 @@ namespace SharePointPnP.PowerShell.Commands
         [Parameter(Mandatory = false, HelpMessage = "Will skip the counting process; by doing this you will not get an estimated time remaining")]
         public SwitchParameter SkipCounting;
 
-
         protected override void ExecuteCmdlet()
         {
             if (WebAction == null && ListAction == null && ListItemAction == null && PostWebAction == null && PostListAction == null)
             {
-                WriteError(new ErrorRecord(new ArgumentNullException("An action need to be specified"), "0", ErrorCategory.InvalidArgument, null));
+                ThrowTerminatingError(new ErrorRecord(new ArgumentNullException("An action need to be specified"), "0", ErrorCategory.InvalidArgument, null));
                 return;
             }
 

@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Lists
+namespace PnP.PowerShell.Commands.Lists
 {
     [Cmdlet(VerbsCommon.New, "PnPList")]
-    [CmdletAlias("New-SPOList")]
     [CmdletHelp("Creates a new list",
-        Category = CmdletHelpCategory.Lists)]
+        Category = CmdletHelpCategory.Lists,
+        SupportedPlatform = CmdletSupportedPlatform.All)]
     [CmdletExample(
         Code = "PS:> New-PnPList -Title Announcements -Template Announcements",
         SortOrder = 1,
         Remarks = "Create a new announcements list")]
     [CmdletExample(
-        Code = @"PS:> New-PnPList -Title ""Demo List"" -Url ""DemoList"" -Template Announcements",
+        Code = @"PS:> New-PnPList -Title ""Demo List"" -Url ""lists/DemoList"" -Template Announcements",
         SortOrder = 2,
-        Remarks = "Create a list with a title that is different from the url")]
-    public class NewList : SPOWebCmdlet
+        Remarks = "Create an announcements list with a title that is different from the url")]
+    [CmdletExample(
+        Code = "PS:> New-PnPList -Title HiddenList -Template GenericList -Hidden",
+        SortOrder = 3,
+        Remarks = "Create a new custom list and hides it from the SharePoint UI")]
+    public class NewList : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The Title of the list")]
         public string Title;
@@ -27,6 +31,9 @@ namespace SharePointPnP.PowerShell.Commands.Lists
 
         [Parameter(Mandatory = false, HelpMessage = "If set, will override the url of the list.")]
         public string Url = null;
+
+        [Parameter(Mandatory = false, HelpMessage = "Switch parameter if list should be hidden from the SharePoint UI")]
+        public SwitchParameter Hidden;
 
         [Parameter(Mandatory = false, HelpMessage = "Switch parameter if versioning should be enabled")]
         public SwitchParameter EnableVersioning;
@@ -43,14 +50,19 @@ namespace SharePointPnP.PowerShell.Commands.Lists
 
         protected override void ExecuteCmdlet()
         {
-            var list = SelectedWeb.CreateList(Template, Title, EnableVersioning, true, Url, EnableContentTypes);
+            var list = SelectedWeb.CreateList(Template, Title, EnableVersioning, true, Url, EnableContentTypes, Hidden);
+            if (Hidden)
+            {
+                SelectedWeb.DeleteNavigationNode(Title, "Recent", OfficeDevPnP.Core.Enums.NavigationType.QuickLaunch);
+            }
             if (OnQuickLaunch)
             {
                 list.OnQuickLaunch = true;
                 list.Update();
                 ClientContext.ExecuteQueryRetry();
             }
+
+            WriteObject(list);
         }
     }
-
 }

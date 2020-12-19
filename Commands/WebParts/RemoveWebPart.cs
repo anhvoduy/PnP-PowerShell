@@ -3,25 +3,32 @@ using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.WebParts;
 using OfficeDevPnP.Core.Utilities;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.WebParts
+namespace PnP.PowerShell.Commands.WebParts
 {
     [Cmdlet(VerbsCommon.Remove, "PnPWebPart")]
-    [CmdletAlias("Remove-SPOWebPart")]
-    [CmdletHelp("Removes a webpart from a page",
+    [CmdletHelp("Removes a web part from a page",
         Category = CmdletHelpCategory.WebParts)]
-    public class RemoveWebPart : SPOWebCmdlet
+    [CmdletExample(
+        Code = @"PS:> Remove-PnPWebPart -ServerRelativePageUrl ""/sites/demo/sitepages/home.aspx"" -Identity a2875399-d6ff-43a0-96da-be6ae5875f82",
+        Remarks = @"This will remove the web part specified by ID to the specified page in the first row and the first column of the HTML table present on the page",
+        SortOrder = 1)]
+    [CmdletExample(
+        Code = @"PS:> Remove-PnPWebPart -ServerRelativePageUrl ""/sites/demo/sitepages/home.aspx"" -Title MyWebpart",
+        Remarks = @"This will remove the web part specified by title to the specified page in the first row and the first column of the HTML table present on the page",
+        SortOrder = 1)]
+    public class RemoveWebPart : PnPWebCmdlet
     {
-        [Parameter(Mandatory = true, ParameterSetName = "ID")]
+        [Parameter(Mandatory = true, ParameterSetName = "ID", HelpMessage = "The Guid of the web part")]
         public GuidPipeBind Identity;
 
-        [Parameter(Mandatory = true, ParameterSetName = "NAME")]
+        [Parameter(Mandatory = true, ParameterSetName = "NAME", HelpMessage = "The name of the web part")]
         [Alias("Name")]
         public string Title = string.Empty;
 
-        [Parameter(Mandatory = true, ParameterSetName = ParameterAttribute.AllParameterSets)]
+        [Parameter(Mandatory = true, ParameterSetName = ParameterAttribute.AllParameterSets, HelpMessage = "Server relative url of the web part page, e.g. /sites/demo/sitepages/home.aspx")]
         [Alias("PageUrl")]
         public string ServerRelativePageUrl = string.Empty;
 

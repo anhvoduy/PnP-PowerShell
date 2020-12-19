@@ -5,14 +5,13 @@ using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.WebParts;
 using OfficeDevPnP.Core.Utilities;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.WebParts
+namespace PnP.PowerShell.Commands.WebParts
 {
     [Cmdlet(VerbsCommon.Get, "PnPWebPart")]
-    [CmdletAlias("Get-SPOWebPart")]
-    [CmdletHelp("Returns a webpart definition object",
+    [CmdletHelp("Returns a web part definition object",
         Category = CmdletHelpCategory.WebParts,
         OutputType=typeof(IEnumerable<WebPartDefinition>),
         OutputTypeLink = "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.webparts.webpartdefinition.aspx")]
@@ -21,14 +20,22 @@ namespace SharePointPnP.PowerShell.Commands.WebParts
         Remarks = @"Returns all webparts defined on the given page.", SortOrder = 1)]
     [CmdletExample(
         Code = @"PS:> Get-PnPWebPart -ServerRelativePageUrl ""/sites/demo/sitepages/home.aspx"" -Identity a2875399-d6ff-43a0-96da-be6ae5875f82",
-        Remarks = @"Returns a specific webpart defined on the given page.", SortOrder = 2)]
-    public class GetWebPart : SPOWebCmdlet
+        Remarks = @"Returns a specific web part defined on the given page.", SortOrder = 2)]
+        [CmdletExample(
+        Code = @"PS:> Get-PnPWebPart -ServerRelativePageUrl ""/sites/demo/sitepages/home.aspx"" | Where-Object {$_.WebPart.Title -Like ""*test*""} 
+        
+Title                          Id
+-----                          --
+Apps in Testing                a2875399-d6ff-43a0-96da-be6ae5875f82
+Test Web Part                  e97c7058-4548-4129-bfee-c71ea5015da6",
+        Remarks = @"Returns all web parts with the word ""test"" in their Title on the given page.", SortOrder = 3)]
+    public class GetWebPart : PnPWebCmdlet
     {
-        [Parameter(Mandatory = true, HelpMessage = "Full server relative URL of the webpart page, e.g. /sites/mysite/sitepages/home.aspx")]
+        [Parameter(Mandatory = true, HelpMessage = "Full server relative URL of the web part page, e.g. /sites/mysite/sitepages/home.aspx")]
         [Alias("PageUrl")]
         public string ServerRelativePageUrl = string.Empty;
 
-        [Parameter(Mandatory = false, ValueFromPipeline = true)]
+        [Parameter(Mandatory = false, ValueFromPipeline = true, HelpMessage = "The identity of the web part, this can be the web part guid or a web part object")]
         public WebPartPipeBind Identity;
 
         protected override void ExecuteCmdlet()

@@ -1,20 +1,14 @@
 ﻿using System;
+using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.WorkflowServices;
 
-namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
+namespace PnP.PowerShell.Commands.Base.PipeBinds
 {
     public sealed class WorkflowSubscriptionPipeBind
     {
         private readonly WorkflowSubscription _sub;
         private readonly Guid _id;
-        private readonly string _name;
-
-        public WorkflowSubscriptionPipeBind()
-        {
-            _sub = null;
-            _id = Guid.Empty;
-            _name = string.Empty;
-        }
+        private readonly string _name = string.Empty;
 
         public WorkflowSubscriptionPipeBind(WorkflowSubscription sub)
         {
@@ -34,22 +28,37 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
             }
         }
 
-        public Guid Id
-        {
-            get { return _id; }
-        }
+        public Guid Id => _id;
 
-        public WorkflowSubscription Subscription
+        public WorkflowSubscription Subscription => _sub;
+
+        public string Name => _name;
+
+        internal WorkflowSubscription GetWorkflowSubscription(Web web)
         {
-            get
-            {
+            if (_sub != null)
                 return _sub;
-            }
+
+            if (_id != default(Guid))
+                return new WorkflowServicesManager(web.Context, web)
+                    .GetWorkflowSubscriptionService()
+                    .GetSubscription(_id);
+
+            return web.GetWorkflowSubscription(_name);
         }
 
-        public string Name
+        public override string ToString()
         {
-            get { return _name; }
+            if (_sub?.IsPropertyAvailable(nameof(_sub.Name)) == true)
+                return _sub.Name;
+
+            if (!string.IsNullOrEmpty(_name))
+                return _name;
+
+            if (_sub?.IsPropertyAvailable(nameof(_sub.Id)) == true)
+                return _sub.Id.ToString();
+
+            return _id.ToString();
         }
     }
 }

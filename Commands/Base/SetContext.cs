@@ -1,12 +1,12 @@
 ﻿using System.Management.Automation;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using Microsoft.SharePoint.Client;
 
-namespace SharePointPnP.PowerShell.Commands.Base
+namespace PnP.PowerShell.Commands.Base
 {
     [Cmdlet(VerbsCommon.Set, "PnPContext")]
-    [CmdletAlias("Set-SPOContext")]
-    [CmdletHelp("Sets the Client Context to use by the cmdlets",
+    [CmdletHelp("Set the ClientContext",
+        "Sets the Client Context to use by the cmdlets, which allows easy context switching. See examples for details.",
         Category = CmdletHelpCategory.Base)]
     [CmdletExample(
         Code = @"PS:> Connect-PnPOnline -Url $siteAurl -Credentials $credentials
@@ -23,7 +23,7 @@ PS:> Get-PnPList # returns the lists from site A", SortOrder = 1)]
 
         protected override void ProcessRecord()
         {
-            SPOnlineConnection.CurrentConnection.Context = Context;
+            PnPConnection.CurrentConnection.Context = Context;
         }
     }
 }

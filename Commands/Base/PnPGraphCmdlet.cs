@@ -1,61 +1,85 @@
-﻿using Microsoft.Graph;
-using SharePointPnP.PowerShell.Commands.Properties;
+﻿#if !ONPREMISES
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Model;
+using PnP.PowerShell.Commands.Properties;
+using PnP.PowerShell.Core.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Http;
 
-namespace SharePointPnP.PowerShell.Commands.Base
+namespace PnP.PowerShell.Commands.Base
 {
     /// <summary>
     /// Base class for all the PnP Microsoft Graph related cmdlets
     /// </summary>
-    public abstract class PnPGraphCmdlet : PSCmdlet
+    public abstract class PnPGraphCmdlet : PnPConnectedCmdlet
     {
-        public String AccessToken
+        [Parameter(Mandatory = false, HelpMessage = "Allows the check for required permissions in the access token to be bypassed when set to $true")]
+        public SwitchParameter ByPassPermissionCheck;
+
+        /// <summary>
+        /// Returns an Access Token for the Microsoft Graph API, if available, otherwise NULL
+        /// </summary>
+        public GraphToken Token
         {
             get
             {
-                if (PnPAzureADConnection.AuthenticationResult != null)
+                var tokenType = TokenType.All;
+
+                // Collect, if present, the token type attribute
+                var tokenTypeAttribute = (CmdletTokenTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(CmdletTokenTypeAttribute));
+                if(tokenTypeAttribute != null)
                 {
-                    if (PnPAzureADConnection.AuthenticationResult.ExpiresOn < DateTimeOffset.Now)
+                    tokenType = tokenTypeAttribute.TokenType;
+                }
+                // Collect the permission attributes to discover required roles
+                var requiredRoleAttributes = (CmdletMicrosoftGraphApiPermission[])Attribute.GetCustomAttributes(GetType(), typeof(CmdletMicrosoftGraphApiPermission));
+                var orRequiredRoles = new List<string>(requiredRoleAttributes.Length);
+                var andRequiredRoles = new List<string>(requiredRoleAttributes.Length);
+                foreach (var requiredRoleAttribute in requiredRoleAttributes)
+                {
+
+                    foreach (MicrosoftGraphApiPermission role in Enum.GetValues(typeof(MicrosoftGraphApiPermission)))
                     {
-                        WriteWarning(Resources.MicrosoftGraphOAuthAccessTokenExpired);
-                        PnPAzureADConnection.AuthenticationResult = null;
-                        return (null);
-                    }
-                    else
-                    {
-                        return (PnPAzureADConnection.AuthenticationResult.Token);
+                        if (role != MicrosoftGraphApiPermission.None)
+                        {
+                            if (requiredRoleAttribute.OrApiPermissions.HasFlag(role))
+                            {
+                                orRequiredRoles.Add(role.ToString().Replace("_", "."));
+                            }
+                            if (requiredRoleAttribute.AndApiPermissions.HasFlag(role))
+                            {
+                                andRequiredRoles.Add(role.ToString().Replace("_", "."));
+                            }
+                        }
                     }
                 }
-                else
+
+                // Ensure we have an active connection
+                if (PnPConnection.CurrentConnection != null)
                 {
-                    WriteError(new ErrorRecord(new InvalidOperationException(Resources.NoAzureADAccessToken), "NO_OAUTH_TOKEN", ErrorCategory.ConnectionError, null));
-                    return (null);
+                    // There is an active connection, try to get a Microsoft Graph Token on the active connection
+                    if (PnPConnection.CurrentConnection.TryGetToken(Enums.TokenAudience.MicrosoftGraph, PnPConnection.CurrentConnection.AzureEnvironment, ByPassPermissionCheck.ToBool() ? null : orRequiredRoles.ToArray(), ByPassPermissionCheck.ToBool() ? null : andRequiredRoles.ToArray(), tokenType) is GraphToken token)
+                    {
+                        // Microsoft Graph Access Token available, return it
+                        return (GraphToken)token;
+                    }
                 }
+
+                // No valid Microsoft Graph Access Token available, throw an error
+                ThrowTerminatingError(new ErrorRecord(new InvalidOperationException(string.Format(Resources.NoApiAccessToken, Enums.TokenAudience.MicrosoftGraph)), "NO_OAUTH_TOKEN", ErrorCategory.ConnectionError, null));
+                return null;
+
             }
         }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
+        /// <summary>
+        /// Returns an Access Token for Microsoft Graph, if available, otherwise NULL
+        /// </summary>
+        public string AccessToken => Token?.AccessToken;
 
-            if (PnPAzureADConnection.AuthenticationResult == null || 
-                String.IsNullOrEmpty(PnPAzureADConnection.AuthenticationResult.Token))
-            {
-                throw new InvalidOperationException(Resources.NoAzureADAccessToken);
-            }
-        }
-
-        protected virtual void ExecuteCmdlet()
-        { }
-
-        protected override void ProcessRecord()
-        {
-            ExecuteCmdlet();
-        }
+        public HttpClient HttpClient => PnPConnection.CurrentConnection.HttpClient;
     }
 }
+#endif

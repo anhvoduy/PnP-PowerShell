@@ -1,12 +1,12 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Branding
+namespace PnP.PowerShell.Commands.Branding
 {
     [Cmdlet(VerbsCommon.Set, "PnPMinimalDownloadStrategy")]
-    [CmdletAlias("Set-SPOMinimalDownloadStrategy")]
-    [CmdletHelp("Activates or deactivates the minimal downloading strategy.", 
+    [CmdletHelp("Activates or deactivates the minimal downloading strategy.",
+        "Activates or deactivates the minimal download strategy feature of a site",
         Category = CmdletHelpCategory.Branding)]
     [CmdletExample(
         Code = @"PS:> Set-PnPMinimalDownloadStrategy -Off",
@@ -16,15 +16,15 @@ namespace SharePointPnP.PowerShell.Commands.Branding
         Code = @"PS:> Set-PnPMinimalDownloadStrategy -On",
         Remarks = "Will activate minimal download strategy (MDS) for the current web.",
         SortOrder = 2)]
-    public class SetMDS : SPOWebCmdlet
+    public class SetMinimalDownloadStrategy : PnPWebCmdlet
     {
         [Parameter(ParameterSetName = "On", Mandatory = true, HelpMessage = "Turn minimal download strategy on")]
         public SwitchParameter On;
 
         [Parameter(ParameterSetName = "Off", Mandatory = true, HelpMessage = "Turn minimal download strategy off")]
         public SwitchParameter Off;
-
-        [Parameter(Mandatory = false, HelpMessage = "Specifying the Force parameter will skip the confirmation question.")]
+         
+        [Parameter(Mandatory = false, HelpMessage = "Specifies whether to overwrite (when activating) or continue (when deactivating) an existing feature with the same feature identifier. This parameter is ignored if there are no errors.")]
         public SwitchParameter Force;
 
         protected override void ExecuteCmdlet()

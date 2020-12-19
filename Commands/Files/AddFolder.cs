@@ -1,19 +1,18 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using OfficeDevPnP.Core.Utilities;
 
-namespace SharePointPnP.PowerShell.Commands.Files
+namespace PnP.PowerShell.Commands.Files
 {
     [Cmdlet(VerbsCommon.Add, "PnPFolder")]
-    [CmdletAlias("Add-SPOFolder")]
     [CmdletHelp("Creates a folder within a parent folder",
         Category = CmdletHelpCategory.Files)]
     [CmdletExample(
         Code = @"PS:> Add-PnPFolder -Name NewFolder -Folder _catalogs/masterpage",
 		Remarks = "This will create the folder NewFolder in the masterpage catalog",
         SortOrder = 1)]
-    public class AddFolder : SPOWebCmdlet
+    public class AddFolder : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The folder name")]
         public string Name = string.Empty;
@@ -29,7 +28,9 @@ namespace SharePointPnP.PowerShell.Commands.Files
             ClientContext.Load(folder, f => f.ServerRelativeUrl);
             ClientContext.ExecuteQueryRetry();
 
-            folder.CreateFolder(Name);
+            var result = folder.CreateFolder(Name);
+
+            WriteObject(result);
         }
     }
 }

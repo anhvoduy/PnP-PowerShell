@@ -2,14 +2,13 @@
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Lists
+namespace PnP.PowerShell.Commands.Lists
 {
     //TODO: Create Test
     [Cmdlet(VerbsCommon.Set, "PnPListPermission")]
-    [CmdletAlias("Set-SPOListPermission")]
     [CmdletHelp("Sets list permissions",
         Category = CmdletHelpCategory.Lists)]
     [CmdletExample(
@@ -20,7 +19,7 @@ namespace SharePointPnP.PowerShell.Commands.Lists
         Code = "PS:> Set-PnPListPermission -Identity 'Documents' -User 'user@contoso.com' -RemoveRole 'Contribute'",
         Remarks = "Removes the 'Contribute' permission to the user 'user@contoso.com' for the list 'Documents'",
         SortOrder = 2)]        
-    public class SetListPermission : SPOWebCmdlet
+    public class SetListPermission : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, ParameterSetName = ParameterAttribute.AllParameterSets, HelpMessage = "The ID or Title of the list.")]
         public ListPipeBind Identity;
@@ -62,6 +61,7 @@ namespace SharePointPnP.PowerShell.Commands.Lists
                 else
                 {
                     principal = SelectedWeb.EnsureUser(User);
+                    ClientContext.ExecuteQueryRetry();
                 }
                 if (principal != null)
                 {

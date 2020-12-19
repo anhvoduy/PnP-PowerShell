@@ -1,18 +1,21 @@
-﻿using System.IO;
-using System.Management.Automation;
+﻿using System;
 using System.Globalization;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using System.IO;
+using System.Management.Automation;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands
+namespace PnP.PowerShell.Commands.Apps
 {
+#if!ONPREMISES
+    [Obsolete("Use Add-PnPApp, Install-PnPApp instead")]
+#endif
     [Cmdlet(VerbsData.Import, "PnPAppPackage")]
-    [CmdletAlias("Import-SPOAppPackage")]
     [CmdletHelp("Adds a SharePoint Addin to a site",
-        DetailedDescription = "This commands requires that you have an addin package to deploy", 
+        "This commands requires that you have an addin package to deploy",
         Category = CmdletHelpCategory.Apps,
-         OutputType= typeof(AppInstance),
+         OutputType = typeof(AppInstance),
         OutputTypeLink = "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.appinstance.aspx")]
     [CmdletExample(
         Code = @"PS:> Import-PnPAppPackage -Path c:\files\demo.app -LoadOnly",
@@ -22,7 +25,7 @@ namespace SharePointPnP.PowerShell.Commands
         Code = @"PS:> Import-PnPAppPackage -Path c:\files\demo.app -Force",
         Remarks = @"This load first activate the addin sideloading feature, upload and install the addin, and deactivate the addin sideloading feature.
     ", SortOrder = 2)]
-    public class ImportAppPackage : SPOWebCmdlet
+    public class ImportAppPackage : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "Path pointing to the .app file")]
         public string Path = string.Empty;
@@ -50,7 +53,7 @@ namespace SharePointPnP.PowerShell.Commands
                     ClientContext.Site.ActivateFeature(Constants.FeatureId_Site_AppSideLoading);
                 }
                 AppInstance instance;
-           
+
 
                 var appPackageStream = new FileStream(Path, FileMode.Open, FileAccess.Read);
                 if (Locale == -1)
@@ -77,7 +80,7 @@ namespace SharePointPnP.PowerShell.Commands
                 }
                 ClientContext.Load(instance);
                 ClientContext.ExecuteQueryRetry();
-                
+
 
                 if (Force)
                 {
@@ -87,7 +90,7 @@ namespace SharePointPnP.PowerShell.Commands
             }
             else
             {
-                WriteError(new ErrorRecord(new IOException(Properties.Resources.FileDoesNotExist), "1", ErrorCategory.InvalidArgument, null));
+                ThrowTerminatingError(new ErrorRecord(new IOException(Properties.Resources.FileDoesNotExist), "1", ErrorCategory.InvalidArgument, null));
             }
         }
     }

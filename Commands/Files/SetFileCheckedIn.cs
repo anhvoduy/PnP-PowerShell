@@ -1,11 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Files
+namespace PnP.PowerShell.Commands.Files
 {
     [Cmdlet(VerbsCommon.Set, "PnPFileCheckedIn")]
-    [CmdletAlias("Set-SPOFileCheckedIn")]
     [CmdletHelp("Checks in a file", 
         Category = CmdletHelpCategory.Files)]
     [CmdletExample(
@@ -16,7 +15,7 @@ namespace SharePointPnP.PowerShell.Commands.Files
         Code = @"PS:>Set-PnPFileCheckedIn -Url ""/Documents/Contract.docx"" -CheckinType MinorCheckin -Comment ""Smaller changes""",
         SortOrder = 2,
         Remarks = @"Checks in the file ""Contract.docx"" in the ""Documents"" library as a minor version and adds the check in comment ""Smaller changes""")]
-    public class SetFileCheckedIn : SPOWebCmdlet
+    public class SetFileCheckedIn : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, Position=0, ValueFromPipeline=true, HelpMessage = @"The server relative url of the file to check in")]
         public string Url = string.Empty;
@@ -27,9 +26,14 @@ namespace SharePointPnP.PowerShell.Commands.Files
         [Parameter(Mandatory = false, HelpMessage = @"The check in comment")]
         public string Comment = "";
 
+        [Parameter(Mandatory = false, HelpMessage = "Approve file")]
+        public SwitchParameter Approve;
+
         protected override void ExecuteCmdlet()
         {
             SelectedWeb.CheckInFile(Url, CheckinType, Comment);
+            if (Approve)
+                SelectedWeb.ApproveFile(Url, Comment);
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.Site
+namespace PnP.PowerShell.Commands.Site
 {
     [Cmdlet(VerbsCommon.Get, "PnPAuditing")]
-    [CmdletAlias("Get-SPOAuditing")]
     [CmdletHelp("Get the Auditing setting of a site",
         Category = CmdletHelpCategory.Sites,
         OutputType = typeof(Audit),
@@ -14,7 +13,7 @@ namespace SharePointPnP.PowerShell.Commands.Site
         Code = @"PS:> Get-PnPAuditing",
         Remarks = "Gets the auditing settings of the current site",
         SortOrder = 1)]
-    public class GetAuditing : SPOCmdlet
+    public class GetAuditing : PnPSharePointCmdlet
     {
         protected override void ExecuteCmdlet()
         {

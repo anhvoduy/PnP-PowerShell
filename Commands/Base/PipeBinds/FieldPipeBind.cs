@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.SharePoint.Client;
 
-namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
+namespace PnP.PowerShell.Commands.Base.PipeBinds
 {
     public sealed class FieldPipeBind
     {
@@ -33,19 +33,10 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
             _name = String.Empty;
         }
 
-        public Guid Id
-        {
-            get { return _id; }
-        }
+        public Guid Id => _id;
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
 
-        public Field Field
-        {
-            get { return _field; }
-        }
+        public Field Field => _field;
     }
 }

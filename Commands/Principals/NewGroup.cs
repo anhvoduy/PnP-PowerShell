@@ -1,13 +1,12 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Enums;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Enums;
 using System;
 
-namespace SharePointPnP.PowerShell.Commands.Principals
+namespace PnP.PowerShell.Commands.Principals
 {
-    [Cmdlet("New", "PnPGroup")]
-    [CmdletAlias("New-SPOGroup")]
+    [Cmdlet(VerbsCommon.New, "PnPGroup")]
     [CmdletHelp("Adds group to the Site Groups List and returns a group object",
         Category = CmdletHelpCategory.Principals,
         OutputType = typeof(Group),
@@ -15,7 +14,7 @@ namespace SharePointPnP.PowerShell.Commands.Principals
     [CmdletExample(
         Code = @"PS:> New-PnPGroup -Title ""My Site Users""",
         SortOrder = 1)]
-    public class NewGroup : SPOWebCmdlet
+    public class NewGroup : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The Title of the group")]
         public string Title = string.Empty;

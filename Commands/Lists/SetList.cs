@@ -1,12 +1,11 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.Lists
+namespace PnP.PowerShell.Commands.Lists
 {
     [Cmdlet(VerbsCommon.Set, "PnPList")]
-    [CmdletAlias("Set-SPOList")]
     [CmdletHelp("Updates list settings",
          Category = CmdletHelpCategory.Lists)]
     [CmdletExample(
@@ -14,18 +13,26 @@ namespace SharePointPnP.PowerShell.Commands.Lists
          Remarks = "Switches the Enable Content Type switch on the list",
          SortOrder = 1)]
     [CmdletExample(
+         Code = @"Set-PnPList -Identity ""Demo List"" -Hidden $true",
+         Remarks = "Hides the list from the SharePoint UI.",
+         SortOrder = 2)]
+    [CmdletExample(
          Code = @"Set-PnPList -Identity ""Demo List"" -EnableVersioning $true",
          Remarks = "Turns on major versions on a list",
-         SortOrder = 2)]
+         SortOrder = 3)]
     [CmdletExample(
          Code = @"Set-PnPList -Identity ""Demo List"" -EnableVersioning $true -MajorVersions 20",
          Remarks = "Turns on major versions on a list and sets the maximum number of Major Versions to keep to 20.",
-         SortOrder = 3)]
+         SortOrder = 4)]
     [CmdletExample(
          Code = @"Set-PnPList -Identity ""Demo Library"" -EnableVersioning $true -EnableMinorVersions $true -MajorVersions 20 -MinorVersions 5",
          Remarks = "Turns on major versions on a document library and sets the maximum number of Major versions to keep to 20 and sets the maximum of Minor versions to 5.",
-         SortOrder = 4)]
-    public class SetList : SPOWebCmdlet
+         SortOrder = 5)]
+    [CmdletExample(
+        Code = @"Set-PnPList -Identity ""Demo List"" -EnableAttachments $true",
+        Remarks = "Turns on attachments on a list",
+        SortOrder = 6)]
+    public class SetList : PnPWebCmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The ID, Title or Url of the list.")]
         public ListPipeBind Identity;
@@ -39,6 +46,10 @@ namespace SharePointPnP.PowerShell.Commands.Lists
         public
             SwitchParameter BreakRoleInheritance;
 
+        [Parameter(Mandatory = false, HelpMessage = "If used the security inheritance is reset for this list (inherited from parent)")]
+        public
+            SwitchParameter ResetRoleInheritance;
+        
         [Parameter(Mandatory = false, HelpMessage = "If used the roles are copied from the parent web")]
         public
             SwitchParameter CopyRoleAssignments;
@@ -52,6 +63,26 @@ namespace SharePointPnP.PowerShell.Commands.Lists
         [Parameter(Mandatory = false, HelpMessage = "The title of the list")]
         public string Title = string.Empty;
 
+        [Parameter(Mandatory = false, HelpMessage = "The description of the list")]
+        public string Description;
+
+        [Parameter(Mandatory = false, HelpMessage = "Hide the list from the SharePoint UI. Set to $true to hide, $false to show.")]
+        public bool Hidden;
+
+        [Parameter(Mandatory = false, HelpMessage = "Enable or disable force checkout. Set to $true to enable, $false to disable.")]
+        public bool ForceCheckout;
+
+#if !ONPREMISES
+        [Parameter(Mandatory = false, HelpMessage = "Set the list experience: Auto, NewExperience or ClassicExperience")]
+        public ListExperience ListExperience;
+#endif
+
+        [Parameter(Mandatory = false, HelpMessage = "Enable or disable attachments. Set to $true to enable, $false to disable.")]
+        public bool EnableAttachments;
+
+        [Parameter(Mandatory = false, HelpMessage = "Enable or disable folder creation. Set to $true to enable, $false to disable.")]
+        public bool EnableFolderCreation;
+
         [Parameter(Mandatory = false, HelpMessage = "Enable or disable versioning. Set to $true to enable, $false to disable.")]
         public bool EnableVersioning;
 
@@ -64,54 +95,109 @@ namespace SharePointPnP.PowerShell.Commands.Lists
         [Parameter(Mandatory = false, HelpMessage = "Maximum minor versions to keep")]
         public uint MinorVersions = 10;
 
+        [Parameter(Mandatory = false, HelpMessage = "Enable or disable whether content approval is enabled for the list. Set to $true to enable, $false to disable.")]
+        public bool EnableModeration;
+
         protected override void ExecuteCmdlet()
         {
             var list = Identity.GetList(SelectedWeb);
 
             if (list != null)
             {
-                var isDirty = false;
+                list.EnsureProperties(l => l.EnableAttachments, l => l.EnableVersioning, l => l.EnableMinorVersions, l => l.Hidden, l => l.EnableModeration, l => l.BaseType, l => l.HasUniqueRoleAssignments, l => l.ContentTypesEnabled);
+                
+                var enableVersioning = list.EnableVersioning;
+                var enableMinorVersions = list.EnableMinorVersions;
+                var hidden = list.Hidden;
+                var enableAttachments = list.EnableAttachments;
+
+                var updateRequired = false;
                 if (BreakRoleInheritance)
                 {
                     list.BreakRoleInheritance(CopyRoleAssignments, ClearSubscopes);
-                    isDirty = true;
+                    updateRequired = true;
+                }
+
+                if ((list.HasUniqueRoleAssignments) && (ResetRoleInheritance))
+                {
+                    list.ResetRoleInheritance();
+                    updateRequired = true;
                 }
 
                 if (!string.IsNullOrEmpty(Title))
                 {
                     list.Title = Title;
-                    isDirty = true;
+                    updateRequired = true;
                 }
 
-                if (MyInvocation.BoundParameters.ContainsKey("EnableContentTypes") && list.ContentTypesEnabled != EnableContentTypes)
+                if (ParameterSpecified(nameof(Hidden)) && Hidden != list.Hidden)
+                {
+                    list.Hidden = Hidden;
+                    updateRequired = true;
+                }
+
+                if (ParameterSpecified(nameof(EnableContentTypes)) && list.ContentTypesEnabled != EnableContentTypes)
                 {
                     list.ContentTypesEnabled = EnableContentTypes;
-                    isDirty = true;
+                    updateRequired = true;
                 }
 
-                list.EnsureProperties(l => l.EnableVersioning, l => l.EnableMinorVersions);
-
-                var enableVersioning = list.EnableVersioning;
-                var enableMinorVersions = list.EnableMinorVersions;
-
-                if (MyInvocation.BoundParameters.ContainsKey("EnableVersioning") && EnableVersioning != enableVersioning)
+                if (ParameterSpecified(nameof(EnableVersioning)) && EnableVersioning != enableVersioning)
                 {
                     list.EnableVersioning = EnableVersioning;
-                    isDirty = true;
+                    updateRequired = true;
                 }
 
-                if (MyInvocation.BoundParameters.ContainsKey("EnableMinorVersions") && EnableMinorVersions != enableMinorVersions)
+                if (ParameterSpecified(nameof(EnableMinorVersions)) && EnableMinorVersions != enableMinorVersions)
                 {
                     list.EnableMinorVersions = EnableMinorVersions;
-                    isDirty = true;
+                    updateRequired = true;
                 }
 
-                if (isDirty)
+                if (ParameterSpecified(nameof(EnableModeration)) && list.EnableModeration != EnableModeration)
+                {
+                    list.EnableModeration = EnableModeration;
+                    updateRequired = true;
+                }
+
+                if (ParameterSpecified(nameof(EnableAttachments)) && EnableAttachments != enableAttachments)
+                {
+                    list.EnableAttachments = EnableAttachments;
+                    updateRequired = true;
+                }
+
+                if (ParameterSpecified(nameof(Description)))
+                {
+                    list.Description = Description;
+                    updateRequired = true;
+                }
+
+                if (ParameterSpecified(nameof(EnableFolderCreation)))
+                {
+                    list.EnableFolderCreation = EnableFolderCreation;
+                    updateRequired = true;
+                }
+
+                if (ParameterSpecified(nameof(ForceCheckout)))
+                {
+                    list.ForceCheckout = ForceCheckout;
+                    updateRequired = true;
+                }
+
+#if !ONPREMISES
+                if (ParameterSpecified(nameof(ListExperience)))
+                {
+                    list.ListExperienceOptions = ListExperience;
+                    updateRequired = true;
+                }
+#endif
+
+                if (updateRequired)
                 {
                     list.Update();
                     ClientContext.ExecuteQueryRetry();
                 }
-                isDirty = false;
+                updateRequired = false;
 
                 if (list.EnableVersioning)
                 {
@@ -119,28 +205,31 @@ namespace SharePointPnP.PowerShell.Commands.Lists
 
                     if (list.BaseType == BaseType.DocumentLibrary)
                     {
-                        if (MyInvocation.BoundParameters.ContainsKey("MajorVersions"))
+
+                        if (ParameterSpecified(nameof(MajorVersions)))
                         {
                             list.MajorVersionLimit = (int)MajorVersions;
-                            isDirty = true;
+                            updateRequired = true;
                         }
 
-                        if (MyInvocation.BoundParameters.ContainsKey("MinorVersions") && list.EnableMinorVersions)
+                        if (ParameterSpecified(nameof(MinorVersions)) && list.EnableMinorVersions)
                         {
                             list.MajorWithMinorVersionsLimit = (int)MinorVersions;
-                            isDirty = true;
+                            updateRequired = true;
                         }
                     }
                     else
                     {
-                        if (MyInvocation.BoundParameters.ContainsKey("MajorVersions"))
+                        if (ParameterSpecified(nameof(MajorVersions)))
                         {
                             list.MajorVersionLimit = (int)MajorVersions;
-                            isDirty = true;
+                            updateRequired = true;
                         }
                     }
+
+
                 }
-                if (isDirty)
+                if (updateRequired)
                 {
                     list.Update();
                     ClientContext.ExecuteQueryRetry();

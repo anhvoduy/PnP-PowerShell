@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.Publishing;
 
-namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
+namespace PnP.PowerShell.Commands.Base.PipeBinds
 {
     public sealed class ImageRenditionPipeBind
     {
@@ -21,11 +21,11 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
             _item = item;
         }
 
-        public ImageRenditionPipeBind(string idorname)
+        public ImageRenditionPipeBind(string idOrName)
         {
             int id;
 
-            if (int.TryParse(idorname, out id))
+            if (int.TryParse(idOrName, out id))
             {
                 _id = id;
                 _name = null;
@@ -33,7 +33,7 @@ namespace SharePointPnP.PowerShell.Commands.Base.PipeBinds
             else
             {
                 _id = null;
-                _name = idorname;
+                _name = idOrName;
             }
         }
 

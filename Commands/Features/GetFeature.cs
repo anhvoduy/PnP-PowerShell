@@ -1,20 +1,21 @@
 ﻿using Microsoft.SharePoint.Client;
 using System.Collections.Generic;
 using System.Management.Automation;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 using System;
 using System.Linq;
-using SharePointPnP.PowerShell.Commands.Enums;
+using System.Linq.Expressions;
+using PnP.PowerShell.Commands.Base;
+using PnP.PowerShell.Commands.Enums;
 
-namespace SharePointPnP.PowerShell.Commands.Features
+namespace PnP.PowerShell.Commands.Features
 {
     [Cmdlet(VerbsCommon.Get, "PnPFeature")]
-    [CmdletAlias("Get-SPOFeature")]
     [CmdletHelp("Returns all activated or a specific activated feature",
         Category = CmdletHelpCategory.Features,
-        OutputType=typeof(IEnumerable<Feature>),
-        OutputTypeLink= "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.feature.aspx")]
+        OutputType = typeof(IEnumerable<Feature>),
+        OutputTypeLink = "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.feature.aspx")]
     [CmdletExample(
      Code = @"PS:> Get-PnPFeature",
      Remarks = @"This will return all activated web scoped features", SortOrder = 1)]
@@ -27,7 +28,7 @@ namespace SharePointPnP.PowerShell.Commands.Features
     [CmdletExample(
      Code = @"PS:> Get-PnPFeature -Identity fb689d0e-eb99-4f13-beb3-86692fd39f22 -Scope Site",
      Remarks = @"This will return a specific activated site scoped feature", SortOrder = 4)]
-    public class GetFeature : SPOWebCmdlet
+    public class GetFeature : PnPWebRetrievalsCmdlet<Feature>
     {
         [Parameter(Mandatory = false, Position = 0, ValueFromPipeline = true, HelpMessage = "The feature ID or name to query for, Querying by name is not supported in version 15 of the Client Side Object Model")]
         public FeaturePipeBind Identity;
@@ -37,6 +38,11 @@ namespace SharePointPnP.PowerShell.Commands.Features
 
         protected override void ExecuteCmdlet()
         {
+#if !SP2013
+            DefaultRetrievalExpressions = new Expression<Func<Feature, object>>[] { f => f.DisplayName };
+#else
+            DefaultRetrievalExpressions = new Expression<Func<Feature, object>>[] { f => f.DefinitionId };
+#endif
             FeatureCollection featureCollection;
             if (Scope == FeatureScope.Site)
             {
@@ -46,19 +52,7 @@ namespace SharePointPnP.PowerShell.Commands.Features
             {
                 featureCollection = SelectedWeb.Features;
             }
-            IEnumerable<Feature> query;
-#if !ONPREMISES
-            if (ClientContext.ServerVersion.Major > 15)
-            {
-                query = ClientContext.LoadQuery(featureCollection.IncludeWithDefaultProperties(f => f.DisplayName));
-            }
-            else
-            {
-                query = ClientContext.LoadQuery(featureCollection.IncludeWithDefaultProperties());
-            }
-#else
-            query = ClientContext.LoadQuery(featureCollection.IncludeWithDefaultProperties());
-#endif
+            IEnumerable<Feature> query = ClientContext.LoadQuery(featureCollection.IncludeWithDefaultProperties(RetrievalExpressions));
             ClientContext.ExecuteQueryRetry();
             if (Identity == null)
             {
@@ -72,7 +66,7 @@ namespace SharePointPnP.PowerShell.Commands.Features
                 }
                 else if (!string.IsNullOrEmpty(Identity.Name))
                 {
-#if !ONPREMISES
+#if !SP2013
                     WriteObject(query.Where(f => f.DisplayName.Equals(Identity.Name, StringComparison.OrdinalIgnoreCase)));
 #else
                     throw new Exception("Querying by name is not supported in version 15 of the Client Side Object Model");

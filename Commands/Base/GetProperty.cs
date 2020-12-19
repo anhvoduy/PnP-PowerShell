@@ -1,14 +1,14 @@
 ﻿using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using System;
 using System.Linq.Expressions;
 using System.Management.Automation;
 
-namespace SharePointPnP.PowerShell.Commands.Base
+namespace PnP.PowerShell.Commands.Base
 {
     [Cmdlet(VerbsCommon.Get, "PnPProperty")]
-    [CmdletAlias("Get-SPOProperty")]
-    [CmdletHelp("Will populate properties of an object and optionally, if needed, load the value from the server. If one property is specified its value will be returned to the output.",
+    [CmdletHelp("Returns a previously not loaded property of a ClientObject", 
+        "Will populate properties of an object and optionally, if needed, load the value from the server. If one property is specified its value will be returned to the output.",
         Category = CmdletHelpCategory.Base,
         OutputType = typeof(ClientObject),
         OutputTypeLink = "https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.clientobject.aspx")]
@@ -23,7 +23,7 @@ PS:> $list = Get-PnPList -Identity 'Site Assets'
 PS:> Get-PnPProperty -ClientObject $list -Property Views",
         Remarks = "Will load the views object of the specified list object and return its value to the output.",
         SortOrder = 2)]
-    public class EnsureProperty : SPOCmdlet
+    public class EnsureProperty : PnPSharePointCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, HelpMessage = "Specifies the object where the properties of should be retrieved")]
         public ClientObject ClientObject;

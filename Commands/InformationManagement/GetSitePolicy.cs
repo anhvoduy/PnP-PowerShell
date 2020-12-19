@@ -1,11 +1,10 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 
-namespace SharePointPnP.PowerShell.Commands.InformationManagement
+namespace PnP.PowerShell.Commands.InformationManagement
 {
     [Cmdlet(VerbsCommon.Get, "PnPSitePolicy")]
-    [CmdletAlias("Get-SPOSitePolicy")]
     [CmdletHelp("Retrieves all or a specific site policy",
         Category = CmdletHelpCategory.InformationManagement,
         OutputType=typeof(OfficeDevPnP.Core.Entities.SitePolicyEntity))]
@@ -19,7 +18,7 @@ namespace SharePointPnP.PowerShell.Commands.InformationManagement
       Code = @"PS:> Get-PnPSitePolicy -Name ""Contoso HBI""",
       Remarks = @"Retrieves an available site policy with the name ""Contoso HBI"".", SortOrder = 3)]
 
-    public class GetSitePolicy : SPOWebCmdlet
+    public class GetSitePolicy : PnPWebCmdlet
     {
         [Parameter(Mandatory = false, HelpMessage = "Retrieve all available site policies")]
         public SwitchParameter AllAvailable;
@@ -30,19 +29,19 @@ namespace SharePointPnP.PowerShell.Commands.InformationManagement
         protected override void ExecuteCmdlet()
         {
 
-            if (!MyInvocation.BoundParameters.ContainsKey("AllAvailable") && !MyInvocation.BoundParameters.ContainsKey("Name"))
+            if (!ParameterSpecified(nameof(AllAvailable)) && !ParameterSpecified(nameof(Name)))
             {
                 // Return the current applied site policy
                 WriteObject(this.SelectedWeb.GetAppliedSitePolicy());
             }
             else
             {
-                if (MyInvocation.BoundParameters.ContainsKey("AllAvailable"))
+                if (ParameterSpecified(nameof(AllAvailable)))
                 {
                     WriteObject(SelectedWeb.GetSitePolicies(),true);
                     return;
                 }
-                if (MyInvocation.BoundParameters.ContainsKey("Name"))
+                if (ParameterSpecified(nameof(Name)))
                 {
                     WriteObject(SelectedWeb.GetSitePolicyByName(Name));
                 }

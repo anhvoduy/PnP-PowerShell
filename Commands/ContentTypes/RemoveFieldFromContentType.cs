@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
 
-namespace SharePointPnP.PowerShell.Commands.ContentTypes
+namespace PnP.PowerShell.Commands.ContentTypes
 {
     [Cmdlet(VerbsCommon.Remove, "PnPFieldFromContentType")]
-    [CmdletAlias("Remove-SPOFieldFromContentType")]
     [CmdletHelp("Removes a site column from a content type",
         Category = CmdletHelpCategory.ContentTypes)]
     [CmdletExample(
@@ -17,15 +16,15 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
     [CmdletExample(
      Code = @"PS:> Remove-PnPFieldFromContentType -Field ""Project_Name"" -ContentType ""Project Document"" -DoNotUpdateChildren",
      Remarks = @"This will remove the site column with an internal name of ""Project_Name"" from a content type called ""Project Document"". It will not update content types that inherit from the ""Project Document"" content type.", SortOrder = 1)]
-    public class RemoveFieldFromContentType : SPOWebCmdlet
+    public class RemoveFieldFromContentType : PnPWebCmdlet
     {
-        [Parameter(Mandatory = true, HelpMessage = "The field to remove.")]
+        [Parameter(Mandatory = true, HelpMessage = "The field to remove")]
         public FieldPipeBind Field;
 
-        [Parameter(Mandatory = true, HelpMessage = "The content type where the field is to be removed from.")]
+        [Parameter(Mandatory = true, HelpMessage = "The content type where the field is to be removed from")]
         public ContentTypePipeBind ContentType;
 
-        [Parameter(Mandatory = false, HelpMessage = "If specified, inherited content types will not be updated.")]
+        [Parameter(Mandatory = false, HelpMessage = "If specified, inherited content types will not be updated")]
         public SwitchParameter DoNotUpdateChildren;
 
         protected override void ExecuteCmdlet()
@@ -58,7 +57,7 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
                     }
                     else
                     {
-                        WriteError(new ErrorRecord(new Exception("Cannot find field reference in content type"), "FieldRefNotFound", ErrorCategory.ObjectNotFound, ContentType));
+                        ThrowTerminatingError(new ErrorRecord(new Exception("Cannot find field reference in content type"), "FieldRefNotFound", ErrorCategory.ObjectNotFound, ContentType));
                     }
 
                 }
@@ -86,14 +85,14 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
                         }
                         else
                         {
-                            WriteError(new ErrorRecord(new Exception("Cannot find field reference in content type"), "FieldRefNotFound", ErrorCategory.ObjectNotFound, ContentType));
+                            ThrowTerminatingError(new ErrorRecord(new Exception("Cannot find field reference in content type"), "FieldRefNotFound", ErrorCategory.ObjectNotFound, ContentType));
                         }
                     }
                 }
             }
             else
             {
-                WriteError(new ErrorRecord(new Exception("Field not found"), "FieldNotFound", ErrorCategory.ObjectNotFound, this));
+                ThrowTerminatingError(new ErrorRecord(new Exception("Field not found"), "FieldNotFound", ErrorCategory.ObjectNotFound, this));
             }
         }
 

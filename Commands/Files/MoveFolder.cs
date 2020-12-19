@@ -1,23 +1,26 @@
 ﻿#if !ONPREMISES
 using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.CmdletHelpAttributes;
 using OfficeDevPnP.Core.Utilities;
 
-namespace SharePointPnP.PowerShell.Commands.Files
+namespace PnP.PowerShell.Commands.Files
 {
     [Cmdlet(VerbsCommon.Move, "PnPFolder")]
-    [CmdletHelp("Move a folder to another location in the current web",
-        Category = CmdletHelpCategory.Files)]
+    [CmdletHelp("Move a folder to another location in the current web. If you want to move a folder to a different site collection, use the Move-PnPFile cmdlet instead, which also supports moving folders and also accross site collections.",
+        Category = CmdletHelpCategory.Files,
+        OutputType = typeof(Folder),
+        OutputTypeLink = "https://docs.microsoft.com/previous-versions/office/sharepoint-server/ee538057(v=office.15)"
+    )]
     [CmdletExample(
-        Code = @"PS:> Move-PnPFolder -Folder Documents/Reports -TargetLocation 'Archived Reports'",
+        Code = @"PS:> Move-PnPFolder -Folder Documents/Reports -TargetFolder 'Archived Reports'",
         Remarks = "This will move the folder Reports in the Documents library to the 'Archived Reports' library",
         SortOrder = 1)]
     [CmdletExample(
-        Code = @"PS:> Move-PnPFolder -Folder 'Shared Documents/Reports/2016/Templates' -TargetLocation 'Shared Documents/Reports'",
+        Code = @"PS:> Move-PnPFolder -Folder 'Shared Documents/Reports/2016/Templates' -TargetFolder 'Shared Documents/Reports'",
         Remarks = "This will move the folder Templates to the new location in 'Shared Documents/Reports'",
         SortOrder = 2)]
-    public class MoveFolder : SPOWebCmdlet
+    public class MoveFolder : PnPWebCmdlet
     {
 
         [Parameter(Mandatory = true, HelpMessage = "The folder to move")]
@@ -30,13 +33,34 @@ namespace SharePointPnP.PowerShell.Commands.Files
         {
             SelectedWeb.EnsureProperty(w => w.ServerRelativeUrl);
 
+#if ONPREMISES
             Folder sourceFolder = SelectedWeb.GetFolderByServerRelativeUrl(UrlUtility.Combine(SelectedWeb.ServerRelativeUrl, Folder));
             ClientContext.Load(sourceFolder, f => f.Name, f => f.ServerRelativeUrl);
             ClientContext.ExecuteQueryRetry();
 
-            var targetPath = string.Concat(TargetFolder,"/",sourceFolder.Name);
+            var targetPath = string.Concat(TargetFolder, "/", sourceFolder.Name);
             sourceFolder.MoveTo(targetPath);
             ClientContext.ExecuteQueryRetry();
+
+            var folder = SelectedWeb.GetFolderByServerRelativeUrl(targetPath);
+            ClientContext.Load(folder, f => f.Name, f => f.ItemCount, f => f.TimeLastModified, f => f.ListItemAllFields);
+            ClientContext.ExecuteQueryRetry();
+            WriteObject(folder);
+#else
+            var sourceFolderUrl = UrlUtility.Combine(SelectedWeb.ServerRelativeUrl, Folder);
+            Folder sourceFolder = SelectedWeb.GetFolderByServerRelativePath(ResourcePath.FromDecodedUrl(sourceFolderUrl));
+            ClientContext.Load(sourceFolder, f => f.Name, f => f.ServerRelativeUrl);
+            ClientContext.ExecuteQueryRetry();
+
+            var targetPath = string.Concat(TargetFolder, "/", sourceFolder.Name);
+            sourceFolder.MoveToUsingPath(ResourcePath.FromDecodedUrl(targetPath));
+            ClientContext.ExecuteQueryRetry();
+
+            var folder = SelectedWeb.GetFolderByServerRelativePath(ResourcePath.FromDecodedUrl(targetPath));
+            ClientContext.Load(folder, f => f.Name, f => f.ItemCount, f => f.TimeLastModified, f => f.ListItemAllFields);
+            ClientContext.ExecuteQueryRetry();
+            WriteObject(folder);
+#endif
         }
     }
 }

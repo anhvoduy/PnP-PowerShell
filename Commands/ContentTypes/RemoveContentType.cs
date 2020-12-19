@@ -1,13 +1,12 @@
 ﻿using System.Management.Automation;
 using Microsoft.SharePoint.Client;
-using SharePointPnP.PowerShell.CmdletHelpAttributes;
-using SharePointPnP.PowerShell.Commands.Base.PipeBinds;
-using Resources = SharePointPnP.PowerShell.Commands.Properties.Resources;
+using PnP.PowerShell.CmdletHelpAttributes;
+using PnP.PowerShell.Commands.Base.PipeBinds;
+using Resources = PnP.PowerShell.Commands.Properties.Resources;
 
-namespace SharePointPnP.PowerShell.Commands.ContentTypes
+namespace PnP.PowerShell.Commands.ContentTypes
 {
     [Cmdlet(VerbsCommon.Remove, "PnPContentType")]
-    [CmdletAlias("Remove-SPOContentType")]
     [CmdletHelp("Removes a content type from a web", 
         Category = CmdletHelpCategory.ContentTypes)]
     [CmdletExample(
@@ -18,7 +17,7 @@ namespace SharePointPnP.PowerShell.Commands.ContentTypes
         Code = @"PS:> Remove-PnPContentType -Identity ""Project Document"" -Force",
         Remarks = @"This will remove a content type called ""Project Document"" from the current web with force",
         SortOrder = 2)]
-    public class RemoveContentType : SPOWebCmdlet
+    public class RemoveContentType : PnPWebCmdlet
     {
 
         [Parameter(Mandatory = true, Position=0, ValueFromPipeline=true, HelpMessage="The name or ID of the content type to remove")]
